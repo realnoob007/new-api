@@ -7,6 +7,12 @@ export const API = axios.create({
     : '',
 });
 
+API.interceptors.request.use((config) => {
+  config.headers['accept-language'] =
+    localStorage.getItem('i18nextLng') || 'zh';
+  return config;
+});
+
 API.interceptors.response.use(
   (response) => response,
   (error) => {

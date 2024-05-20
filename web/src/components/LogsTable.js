@@ -583,11 +583,20 @@ const LogsTable = () => {
         <Header>
           <Spin spinning={loadingStat}>
             <h3>
-              {t('components.LogsTable.header', {
-                quota: showStat
+              {t('components.LogsTable.header')}（
+              {t('components.LogsTable.subHeader')}：
+              <span
+                onClick={handleEyeClick}
+                style={{
+                  cursor: 'pointer',
+                  color: 'gray',
+                }}
+              >
+                {showStat
                   ? renderQuota(stat.quota)
-                  : t('components.LogsTable.clickToView'),
-              })}
+                  : t('components.LogsTable.clickToView')}
+              </span>
+              ）
             </h3>
           </Spin>
         </Header>

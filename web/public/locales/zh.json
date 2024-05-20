@@ -597,7 +597,8 @@
                 "usedQuota": "已用额度",
                 "requestCount": "请求次数"
             },
-            "header": "使用明细（总消耗额度：{quota}）",
+            "header": "使用明细",
+            "subHeader": "总消耗额度",
             "clickToView": "点击查看",
             "form": {
                 "tokenName": "令牌名称",

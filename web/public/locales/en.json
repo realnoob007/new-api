@@ -597,7 +597,8 @@
                 "usedQuota": "Used Quota",
                 "requestCount": "Request Count"
             },
-            "header": "Usage Details (Total Consumed Quota: {quota})",
+            "header": "Usage Details",
+            "subHeader": "Total Consumed Quota",
             "clickToView": "Click to view",
             "form": {
                 "tokenName": "Token Name",
