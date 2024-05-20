@@ -315,7 +315,9 @@
             "dashboard": "Dashboard",
             "drawing": "Drawing",
             "settings": "Settings",
-            "serverError": "Unable to connect to the server!"
+            "serverError": "Unable to connect to the server!",
+            "collapse": "Expand sidebar",
+            "collapsed": "Collapse sidebar"
         },
         "RegisterForm": {
             "shortPassword": "Password length must not be less than 8 characters!",

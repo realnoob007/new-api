@@ -223,7 +223,14 @@ const SiderBar = () => {
               text: systemName,
             }}
           >
-            <Nav.Footer collapseButton={true}></Nav.Footer>
+            <Nav.Footer
+              collapseButton={true}
+              collapseText={(val) =>
+                val
+                  ? t('components.SiderBar.collapse')
+                  : t('components.SiderBar.collapsed')
+              }
+            ></Nav.Footer>
           </Nav>
         </div>
       </Layout>

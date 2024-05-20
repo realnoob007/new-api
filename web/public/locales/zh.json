@@ -315,7 +315,9 @@
             "dashboard": "数据看板",
             "drawing": "绘图",
             "settings": "设置",
-            "serverError": "无法正常连接至服务器！"
+            "serverError": "无法正常连接至服务器！",
+            "collapse": "展开侧边栏",
+            "collapsed": "收起侧边栏"
         },
         "RegisterForm": {
             "shortPassword": "密码长度不得小于 8 位！",
