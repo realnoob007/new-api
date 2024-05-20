@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   API,
   copy,
-  showError,
+  useShowError,
   showSuccess,
   timestamp2string,
 } from '../helpers';
@@ -19,55 +19,56 @@ import {
   Tag,
 } from '@douyinfe/semi-ui';
 import EditRedemption from '../pages/Redemption/EditRedemption';
+import { useTranslation } from 'react-i18next';
 
 function renderTimestamp(timestamp) {
   return <>{timestamp2string(timestamp)}</>;
 }
 
 function renderStatus(status) {
+  const { t } = useTranslation();
   switch (status) {
     case 1:
       return (
         <Tag color='green' size='large'>
-          未使用
+          {t('components.RedemptionsTable.unused')}
         </Tag>
       );
     case 2:
       return (
         <Tag color='red' size='large'>
-          {' '}
-          已禁用{' '}
+          {t('components.RedemptionsTable.disabled')}
         </Tag>
       );
     case 3:
       return (
         <Tag color='grey' size='large'>
-          {' '}
-          已使用{' '}
+          {t('components.RedemptionsTable.used')}
         </Tag>
       );
     default:
       return (
         <Tag color='black' size='large'>
-          {' '}
-          未知状态{' '}
+          {t('components.RedemptionsTable.unknownStatus')}
         </Tag>
       );
   }
 }
 
 const RedemptionsTable = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
     },
     {
-      title: '名称',
+      title: t('components.RedemptionsTable.name'),
       dataIndex: 'name',
     },
     {
-      title: '状态',
+      title: t('components.RedemptionsTable.status'),
       dataIndex: 'status',
       key: 'status',
       render: (text, record, index) => {
@@ -75,24 +76,26 @@ const RedemptionsTable = () => {
       },
     },
     {
-      title: '额度',
+      title: t('components.RedemptionsTable.quota'),
       dataIndex: 'quota',
       render: (text, record, index) => {
         return <div>{renderQuota(parseInt(text))}</div>;
       },
     },
     {
-      title: '创建时间',
+      title: t('components.RedemptionsTable.createdTime'),
       dataIndex: 'created_time',
       render: (text, record, index) => {
         return <div>{renderTimestamp(text)}</div>;
       },
     },
     {
-      title: '兑换人ID',
+      title: t('components.RedemptionsTable.usedUserId'),
       dataIndex: 'used_user_id',
       render: (text, record, index) => {
-        return <div>{text === 0 ? '无' : text}</div>;
+        return (
+          <div>{text === 0 ? t('components.RedemptionsTable.none') : text}</div>
+        );
       },
     },
     {
@@ -102,7 +105,7 @@ const RedemptionsTable = () => {
         <div>
           <Popover content={record.key} style={{ padding: 20 }} position='top'>
             <Button theme='light' type='tertiary' style={{ marginRight: 1 }}>
-              查看
+              {t('components.RedemptionsTable.view')}
             </Button>
           </Popover>
           <Button
@@ -113,11 +116,11 @@ const RedemptionsTable = () => {
               await copyText(record.key);
             }}
           >
-            复制
+            {t('components.RedemptionsTable.copy')}
           </Button>
           <Popconfirm
-            title='确定是否要删除此兑换码？'
-            content='此修改将不可逆'
+            title={t('components.RedemptionsTable.confirmDelete')}
+            content={t('components.RedemptionsTable.confirmDeleteContent')}
             okType={'danger'}
             position={'left'}
             onConfirm={() => {
@@ -127,7 +130,7 @@ const RedemptionsTable = () => {
             }}
           >
             <Button theme='light' type='danger' style={{ marginRight: 1 }}>
-              删除
+              {t('components.RedemptionsTable.delete')}
             </Button>
           </Popconfirm>
           {record.status === 1 ? (
@@ -139,7 +142,7 @@ const RedemptionsTable = () => {
                 manageRedemption(record.id, 'disable', record);
               }}
             >
-              禁用
+              {t('components.RedemptionsTable.disable')}
             </Button>
           ) : (
             <Button
@@ -151,7 +154,7 @@ const RedemptionsTable = () => {
               }}
               disabled={record.status === 3}
             >
-              启用
+              {t('components.RedemptionsTable.enable')}
             </Button>
           )}
           <Button
@@ -164,7 +167,7 @@ const RedemptionsTable = () => {
             }}
             disabled={record.status !== 1}
           >
-            编辑
+            {t('components.RedemptionsTable.edit')}
           </Button>
         </div>
       ),
@@ -187,19 +190,7 @@ const RedemptionsTable = () => {
     setShowEdit(false);
   };
 
-  // const setCount = (data) => {
-  //     if (data.length >= (activePage) * ITEMS_PER_PAGE) {
-  //         setTokenCount(data.length + 1);
-  //     } else {
-  //         setTokenCount(data.length);
-  //     }
-  // }
-
   const setRedemptionFormat = (redeptions) => {
-    // for (let i = 0; i < redeptions.length; i++) {
-    //     redeptions[i].key = '' + redeptions[i].id;
-    // }
-    // data.key = '' + data.id
     setRedemptions(redeptions);
     if (redeptions.length >= activePage * ITEMS_PER_PAGE) {
       setTokenCount(redeptions.length + 1);
@@ -239,17 +230,18 @@ const RedemptionsTable = () => {
 
   const copyText = async (text) => {
     if (await copy(text)) {
-      showSuccess('已复制到剪贴板！');
+      showSuccess(t('components.RedemptionsTable.copied'));
     } else {
-      // setSearchKeyword(text);
-      Modal.error({ title: '无法复制到剪贴板，请手动复制', content: text });
+      Modal.error({
+        title: t('components.RedemptionsTable.copyFailedTitle'),
+        content: text,
+      });
     }
   };
 
   const onPaginationChange = (e, { activePage }) => {
     (async () => {
       if (activePage === Math.ceil(redemptions.length / ITEMS_PER_PAGE) + 1) {
-        // In this case we have to load more data and then append them.
         await loadRedemptions(activePage - 1);
       }
       setActivePage(activePage);
@@ -286,10 +278,9 @@ const RedemptionsTable = () => {
     }
     const { success, message } = res.data;
     if (success) {
-      showSuccess('操作成功完成！');
+      showSuccess(t('components.RedemptionsTable.actionSuccess'));
       let redemption = res.data.data;
       let newRedemptions = [...redemptions];
-      // let realIdx = (activePage - 1) * ITEMS_PER_PAGE + idx;
       if (action === 'delete') {
       } else {
         record.status = redemption.status;
@@ -302,7 +293,6 @@ const RedemptionsTable = () => {
 
   const searchRedemptions = async () => {
     if (searchKeyword === '') {
-      // if keyword is blank, load files instead.
       await loadRedemptions(0);
       setActivePage(1);
       return;
@@ -342,7 +332,6 @@ const RedemptionsTable = () => {
   const handlePageChange = (page) => {
     setActivePage(page);
     if (page === Math.ceil(redemptions.length / ITEMS_PER_PAGE) + 1) {
-      // In this case we have to load more data and then append them.
       loadRedemptions(page - 1).then((r) => {});
     }
   };
@@ -381,11 +370,11 @@ const RedemptionsTable = () => {
       ></EditRedemption>
       <Form onSubmit={searchRedemptions}>
         <Form.Input
-          label='搜索关键字'
+          label={t('components.RedemptionsTable.searchKeyword')}
           field='keyword'
           icon='search'
           iconPosition='left'
-          placeholder='关键字(id或者名称)'
+          placeholder={t('components.RedemptionsTable.searchPlaceholder')}
           value={searchKeyword}
           loading={searching}
           onChange={handleKeywordChange}
@@ -400,14 +389,8 @@ const RedemptionsTable = () => {
           currentPage: activePage,
           pageSize: ITEMS_PER_PAGE,
           total: tokenCount,
-          // showSizeChanger: true,
-          // pageSizeOptions: [10, 20, 50, 100],
           formatPageText: (page) =>
-            `第 ${page.currentStart} - ${page.currentEnd} 条，共 ${redemptions.length} 条`,
-          // onPageSizeChange: (size) => {
-          //   setPageSize(size);
-          //   setActivePage(1);
-          // },
+            `${t('components.RedemptionsTable.pageText', { currentStart: page.currentStart, currentEnd: page.currentEnd, total: redemptions.length })}`,
           onPageChange: handlePageChange,
         }}
         loading={loading}
@@ -425,24 +408,23 @@ const RedemptionsTable = () => {
           setShowEdit(true);
         }}
       >
-        添加兑换码
+        {t('components.RedemptionsTable.addRedemption')}
       </Button>
       <Button
-        label='复制所选兑换码'
         type='warning'
         onClick={async () => {
           if (selectedKeys.length === 0) {
-            showError('请至少选择一个兑换码！');
+            showError(t('components.RedemptionsTable.selectAtLeastOne'));
             return;
           }
           let keys = '';
           for (let i = 0; i < selectedKeys.length; i++) {
-            keys += selectedKeys[i].name + '    ' + selectedKeys[i].key + '\n';
+            keys += `${selectedKeys[i].name}    ${selectedKeys[i].key}\n`;
           }
           await copyText(keys);
         }}
       >
-        复制所选兑换码到剪贴板
+        {t('components.RedemptionsTable.copySelected')}
       </Button>
     </>
   );

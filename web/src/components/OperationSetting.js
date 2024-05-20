@@ -9,9 +9,12 @@ import SettingsMonitoring from '../pages/Setting/Operation/SettingsMonitoring.js
 import SettingsCreditLimit from '../pages/Setting/Operation/SettingsCreditLimit.js';
 import SettingsMagnification from '../pages/Setting/Operation/SettingsMagnification.js';
 
-import { API, showError, showSuccess } from '../helpers';
+import { API, useShowError, showSuccess } from '../helpers';
+import { useTranslation } from 'react-i18next';
 
 const OperationSetting = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   let [inputs, setInputs] = useState({
     QuotaForNewUser: 0,
     QuotaForInviter: 0,
@@ -85,9 +88,9 @@ const OperationSetting = () => {
     try {
       setLoading(true);
       await getOptions();
-      showSuccess('刷新成功');
+      showSuccess(t('components.OperationSetting.refreshSuccess'));
     } catch (error) {
-      showError('刷新失败');
+      showError(t('components.OperationSetting.refreshFailed'));
     } finally {
       setLoading(false);
     }

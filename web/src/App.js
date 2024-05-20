@@ -23,6 +23,11 @@ import Chat from './pages/Chat';
 import { Layout } from '@douyinfe/semi-ui';
 import Midjourney from './pages/Midjourney';
 import Pricing from './pages/Pricing/index.js';
+
+import zh from '@douyinfe/semi-ui/lib/es/locale/source/zh_CN';
+import en from '@douyinfe/semi-ui/lib/es/locale/source/en_US';
+import { LocaleProvider } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
 // import Detail from './pages/Detail';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -30,7 +35,12 @@ const Detail = lazy(() => import('./pages/Detail'));
 const About = lazy(() => import('./pages/About'));
 
 function App() {
+  const { i18n } = useTranslation();
   const [userState, userDispatch] = useContext(UserContext);
+  const languages = {
+    zh,
+    en,
+  };
   // const [statusState, statusDispatch] = useContext(StatusContext);
 
   const loadUser = () => {
@@ -57,197 +67,199 @@ function App() {
   }, []);
 
   return (
-    <Layout>
-      <Layout.Content>
-        <Routes>
-          <Route
-            path='/'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <Home />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/channel'
-            element={
-              <PrivateRoute>
-                <Channel />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/channel/edit/:id'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <EditChannel />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/channel/add'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <EditChannel />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/token'
-            element={
-              <PrivateRoute>
-                <Token />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/redemption'
-            element={
-              <PrivateRoute>
-                <Redemption />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/user'
-            element={
-              <PrivateRoute>
-                <User />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/user/edit/:id'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <EditUser />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/user/edit'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <EditUser />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/user/reset'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <PasswordResetConfirm />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/login'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <LoginForm />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/register'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <RegisterForm />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/reset'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <PasswordResetForm />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/oauth/github'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <GitHubOAuth />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/setting'
-            element={
-              <PrivateRoute>
+    <LocaleProvider locale={languages[i18n.language]}>
+      <Layout>
+        <Layout.Content>
+          <Routes>
+            <Route
+              path='/'
+              element={
                 <Suspense fallback={<Loading></Loading>}>
-                  <Setting />
+                  <Home />
                 </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/topup'
-            element={
-              <PrivateRoute>
+              }
+            />
+            <Route
+              path='/channel'
+              element={
+                <PrivateRoute>
+                  <Channel />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/channel/edit/:id'
+              element={
                 <Suspense fallback={<Loading></Loading>}>
-                  <TopUp />
+                  <EditChannel />
                 </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/log'
-            element={
-              <PrivateRoute>
-                <Log />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/detail'
-            element={
-              <PrivateRoute>
+              }
+            />
+            <Route
+              path='/channel/add'
+              element={
                 <Suspense fallback={<Loading></Loading>}>
-                  <Detail />
+                  <EditChannel />
                 </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/midjourney'
-            element={
-              <PrivateRoute>
+              }
+            />
+            <Route
+              path='/token'
+              element={
+                <PrivateRoute>
+                  <Token />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/redemption'
+              element={
+                <PrivateRoute>
+                  <Redemption />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/user'
+              element={
+                <PrivateRoute>
+                  <User />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/user/edit/:id'
+              element={
                 <Suspense fallback={<Loading></Loading>}>
-                  <Midjourney />
+                  <EditUser />
                 </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/pricing'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <Pricing />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/about'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <About />
-              </Suspense>
-            }
-          />
-          <Route
-            path='/chat'
-            element={
-              <Suspense fallback={<Loading></Loading>}>
-                <Chat />
-              </Suspense>
-            }
-          />
-          <Route path='*' element={<NotFound />} />
-        </Routes>
-      </Layout.Content>
-    </Layout>
+              }
+            />
+            <Route
+              path='/user/edit'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <EditUser />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/user/reset'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <PasswordResetConfirm />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/login'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <LoginForm />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/register'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <RegisterForm />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/reset'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <PasswordResetForm />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/oauth/github'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <GitHubOAuth />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/setting'
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<Loading></Loading>}>
+                    <Setting />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/topup'
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<Loading></Loading>}>
+                    <TopUp />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/log'
+              element={
+                <PrivateRoute>
+                  <Log />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/detail'
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<Loading></Loading>}>
+                    <Detail />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/midjourney'
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<Loading></Loading>}>
+                    <Midjourney />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/pricing'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <Pricing />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/about'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <About />
+                </Suspense>
+              }
+            />
+            <Route
+              path='/chat'
+              element={
+                <Suspense fallback={<Loading></Loading>}>
+                  <Chat />
+                </Suspense>
+              }
+            />
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+        </Layout.Content>
+      </Layout>
+    </LocaleProvider>
   );
 }
 

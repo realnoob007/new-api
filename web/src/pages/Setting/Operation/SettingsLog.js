@@ -4,12 +4,15 @@ import dayjs from 'dayjs';
 import {
   compareObjects,
   API,
-  showError,
+  useShowError,
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsLog(props) {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [loadingCleanHistoryLog, setLoadingCleanHistoryLog] = useState(false);
   const [inputs, setInputs] = useState({
@@ -24,7 +27,8 @@ export default function SettingsLog(props) {
       (item) => item.key !== 'historyTimestamp',
     );
 
-    if (!updateArray.length) return showWarning('你似乎并没有修改什么');
+    if (!updateArray.length)
+      return showWarning(t('pages.Setting.Operation.SettingsLog.noChanges'));
     const requestQueue = updateArray.map((item) => {
       let value = '';
       if (typeof inputs[item.key] === 'boolean') {
@@ -43,31 +47,40 @@ export default function SettingsLog(props) {
         if (requestQueue.length === 1) {
           if (res.includes(undefined)) return;
         } else if (requestQueue.length > 1) {
-          if (res.includes(undefined)) return showError('部分保存失败，请重试');
+          if (res.includes(undefined))
+            return showError(
+              t('pages.Setting.Operation.SettingsLog.partialSaveFailure'),
+            );
         }
-        showSuccess('保存成功');
+        showSuccess(t('pages.Setting.Operation.SettingsLog.saveSuccess'));
         props.refresh();
       })
       .catch(() => {
-        showError('保存失败，请重试');
+        showError(t('pages.Setting.Operation.SettingsLog.saveFailure'));
       })
       .finally(() => {
         setLoading(false);
       });
   }
+
   async function onCleanHistoryLog() {
     try {
       setLoadingCleanHistoryLog(true);
-      if (!inputs.historyTimestamp) throw new Error('请选择日志记录时间');
+      if (!inputs.historyTimestamp)
+        throw new Error(t('pages.Setting.Operation.SettingsLog.selectLogTime'));
       const res = await API.delete(
         `/api/log/?target_timestamp=${Date.parse(inputs.historyTimestamp) / 1000}`,
       );
       const { success, message, data } = res.data;
       if (success) {
-        showSuccess(`${data} 条日志已清理！`);
+        showSuccess(
+          t('pages.Setting.Operation.SettingsLog.logCleaned', { count: data }),
+        );
         return;
       } else {
-        throw new Error('日志清理失败：' + message);
+        throw new Error(
+          t('pages.Setting.Operation.SettingsLog.logCleanFailed') + message,
+        );
       }
     } catch (error) {
       showError(error.message);
@@ -88,6 +101,7 @@ export default function SettingsLog(props) {
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
   }, [props.options]);
+
   return (
     <>
       <Spin spinning={loading}>
@@ -96,12 +110,14 @@ export default function SettingsLog(props) {
           getFormApi={(formAPI) => (refForm.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'日志设置'}>
+          <Form.Section
+            text={t('pages.Setting.Operation.SettingsLog.logSettings')}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Switch
                   field={'LogConsumeEnabled'}
-                  label={'启用额度消费日志记录'}
+                  label={t('pages.Setting.Operation.SettingsLog.enableLog')}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -116,7 +132,7 @@ export default function SettingsLog(props) {
               <Col span={8}>
                 <Spin spinning={loadingCleanHistoryLog}>
                   <Form.DatePicker
-                    label='日志记录时间'
+                    label={t('pages.Setting.Operation.SettingsLog.logTime')}
                     field={'historyTimestamp'}
                     type='dateTime'
                     inputReadOnly={true}
@@ -128,7 +144,7 @@ export default function SettingsLog(props) {
                     }}
                   />
                   <Button size='default' onClick={onCleanHistoryLog}>
-                    清除历史日志
+                    {t('pages.Setting.Operation.SettingsLog.cleanHistoryLog')}
                   </Button>
                 </Spin>
               </Col>
@@ -136,7 +152,7 @@ export default function SettingsLog(props) {
 
             <Row>
               <Button size='large' onClick={onSubmit}>
-                保存日志设置
+                {t('pages.Setting.Operation.SettingsLog.saveLogSettings')}
               </Button>
             </Row>
           </Form.Section>

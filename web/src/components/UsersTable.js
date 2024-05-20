@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { API, showError, showSuccess } from '../helpers';
+import { API, useShowError, showSuccess } from '../helpers';
 import {
   Button,
   Form,
@@ -13,67 +13,45 @@ import { ITEMS_PER_PAGE } from '../constants';
 import { renderGroup, renderNumber, renderQuota } from '../helpers/render';
 import AddUser from '../pages/User/AddUser';
 import EditUser from '../pages/User/EditUser';
-
-function renderRole(role) {
-  switch (role) {
-    case 1:
-      return <Tag size='large'>普通用户</Tag>;
-    case 10:
-      return (
-        <Tag color='yellow' size='large'>
-          管理员
-        </Tag>
-      );
-    case 100:
-      return (
-        <Tag color='orange' size='large'>
-          超级管理员
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='red' size='large'>
-          未知身份
-        </Tag>
-      );
-  }
-}
+import { useTranslation } from 'react-i18next';
 
 const UsersTable = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
     },
     {
-      title: '用户名',
+      title: t('components.UsersTable.username'),
       dataIndex: 'username',
     },
     {
-      title: '分组',
+      title: t('components.UsersTable.group'),
       dataIndex: 'group',
       render: (text, record, index) => {
         return <div>{renderGroup(text)}</div>;
       },
     },
     {
-      title: '统计信息',
+      title: t('components.UsersTable.info'),
       dataIndex: 'info',
       render: (text, record, index) => {
         return (
           <div>
             <Space spacing={1}>
-              <Tooltip content={'剩余额度'}>
+              <Tooltip content={t('components.UsersTable.remainingQuota')}>
                 <Tag color='white' size='large'>
                   {renderQuota(record.quota)}
                 </Tag>
               </Tooltip>
-              <Tooltip content={'已用额度'}>
+              <Tooltip content={t('components.UsersTable.usedQuota')}>
                 <Tag color='white' size='large'>
                   {renderQuota(record.used_quota)}
                 </Tag>
               </Tooltip>
-              <Tooltip content={'调用次数'}>
+              <Tooltip content={t('components.UsersTable.requestCount')}>
                 <Tag color='white' size='large'>
                   {renderNumber(record.request_count)}
                 </Tag>
@@ -84,26 +62,26 @@ const UsersTable = () => {
       },
     },
     {
-      title: '邀请信息',
+      title: t('components.UsersTable.inviteInfo'),
       dataIndex: 'invite',
       render: (text, record, index) => {
         return (
           <div>
             <Space spacing={1}>
-              <Tooltip content={'邀请人数'}>
+              <Tooltip content={t('components.UsersTable.inviteCount')}>
                 <Tag color='white' size='large'>
                   {renderNumber(record.aff_count)}
                 </Tag>
               </Tooltip>
-              <Tooltip content={'邀请总收益'}>
+              <Tooltip content={t('components.UsersTable.inviteTotal')}>
                 <Tag color='white' size='large'>
                   {renderQuota(record.aff_history_quota)}
                 </Tag>
               </Tooltip>
-              <Tooltip content={'邀请人ID'}>
+              <Tooltip content={t('components.UsersTable.inviterId')}>
                 {record.inviter_id === 0 ? (
                   <Tag color='white' size='large'>
-                    无
+                    {t('components.UsersTable.none')}
                   </Tag>
                 ) : (
                   <Tag color='white' size='large'>
@@ -117,20 +95,51 @@ const UsersTable = () => {
       },
     },
     {
-      title: '角色',
+      title: t('components.UsersTable.role'),
       dataIndex: 'role',
       render: (text, record, index) => {
-        return <div>{renderRole(text)}</div>;
+        return (
+          <div>
+            {(() => {
+              switch (text) {
+                case 1:
+                  return (
+                    <Tag size='large'>
+                      {t('components.UsersTable.commonUser')}
+                    </Tag>
+                  );
+                case 10:
+                  return (
+                    <Tag color='yellow' size='large'>
+                      {t('components.UsersTable.admin')}
+                    </Tag>
+                  );
+                case 100:
+                  return (
+                    <Tag color='orange' size='large'>
+                      {t('components.UsersTable.superAdmin')}
+                    </Tag>
+                  );
+                default:
+                  return (
+                    <Tag color='red' size='large'>
+                      {t('components.UsersTable.unknownRole')}
+                    </Tag>
+                  );
+              }
+            })()}
+          </div>
+        );
       },
     },
     {
-      title: '状态',
+      title: t('components.UsersTable.status'),
       dataIndex: 'status',
       render: (text, record, index) => {
         return (
           <div>
             {record.DeletedAt !== null ? (
-              <Tag color='red'>已注销</Tag>
+              <Tag color='red'>{t('components.UsersTable.deactivated')}</Tag>
             ) : (
               renderStatus(text)
             )}
@@ -148,18 +157,18 @@ const UsersTable = () => {
           ) : (
             <>
               <Popconfirm
-                title='确定？'
+                title={t('components.UsersTable.confirm')}
                 okType={'warning'}
                 onConfirm={() => {
                   manageUser(record.username, 'promote', record);
                 }}
               >
                 <Button theme='light' type='warning' style={{ marginRight: 1 }}>
-                  提升
+                  {t('components.UsersTable.promote')}
                 </Button>
               </Popconfirm>
               <Popconfirm
-                title='确定？'
+                title={t('components.UsersTable.confirm')}
                 okType={'warning'}
                 onConfirm={() => {
                   manageUser(record.username, 'demote', record);
@@ -170,7 +179,7 @@ const UsersTable = () => {
                   type='secondary'
                   style={{ marginRight: 1 }}
                 >
-                  降级
+                  {t('components.UsersTable.demote')}
                 </Button>
               </Popconfirm>
               {record.status === 1 ? (
@@ -182,7 +191,7 @@ const UsersTable = () => {
                     manageUser(record.username, 'disable', record);
                   }}
                 >
-                  禁用
+                  {t('components.UsersTable.disable')}
                 </Button>
               ) : (
                 <Button
@@ -194,7 +203,7 @@ const UsersTable = () => {
                   }}
                   disabled={record.status === 3}
                 >
-                  启用
+                  {t('components.UsersTable.enable')}
                 </Button>
               )}
               <Button
@@ -206,13 +215,13 @@ const UsersTable = () => {
                   setShowEditUser(true);
                 }}
               >
-                编辑
+                {t('components.UsersTable.edit')}
               </Button>
             </>
           )}
           <Popconfirm
-            title='确定是否要删除此用户？'
-            content='硬删除，此修改将不可逆'
+            title={t('components.UsersTable.confirmDelete')}
+            content={t('components.UsersTable.hardDeleteWarning')}
             okType={'danger'}
             position={'left'}
             onConfirm={() => {
@@ -222,7 +231,7 @@ const UsersTable = () => {
             }}
           >
             <Button theme='light' type='danger' style={{ marginRight: 1 }}>
-              删除
+              {t('components.UsersTable.delete')}
             </Button>
           </Popconfirm>
         </div>
@@ -287,7 +296,6 @@ const UsersTable = () => {
   const onPaginationChange = (e, { activePage }) => {
     (async () => {
       if (activePage === Math.ceil(users.length / ITEMS_PER_PAGE) + 1) {
-        // In this case we have to load more data and then append them.
         await loadUsers(activePage - 1);
       }
       setActivePage(activePage);
@@ -310,7 +318,7 @@ const UsersTable = () => {
     });
     const { success, message } = res.data;
     if (success) {
-      showSuccess('操作成功完成！');
+      showSuccess(t('components.UsersTable.operationSuccess'));
       let user = res.data.data;
       let newUsers = [...users];
       if (action === 'delete') {
@@ -327,17 +335,17 @@ const UsersTable = () => {
   const renderStatus = (status) => {
     switch (status) {
       case 1:
-        return <Tag size='large'>已激活</Tag>;
+        return <Tag size='large'>{t('components.UsersTable.activated')}</Tag>;
       case 2:
         return (
           <Tag size='large' color='red'>
-            已封禁
+            {t('components.UsersTable.banned')}
           </Tag>
         );
       default:
         return (
           <Tag size='large' color='grey'>
-            未知状态
+            {t('components.UsersTable.unknownStatus')}
           </Tag>
         );
     }
@@ -345,13 +353,14 @@ const UsersTable = () => {
 
   const searchUsers = async (searchKeyword, searchGroup) => {
     if (searchKeyword === '' && searchGroup === '') {
-      // if keyword is blank, load files instead.
       await loadUsers(0);
       setActivePage(1);
       return;
     }
     setSearching(true);
-    const res = await API.get(`/api/user/search?keyword=${searchKeyword}&group=${searchGroup}`);
+    const res = await API.get(
+      `/api/user/search?keyword=${searchKeyword}&group=${searchGroup}`,
+    );
     const { success, message, data } = res.data;
     if (success) {
       setUsers(data);
@@ -383,7 +392,6 @@ const UsersTable = () => {
   const handlePageChange = (page) => {
     setActivePage(page);
     if (page === Math.ceil(users.length / ITEMS_PER_PAGE) + 1) {
-      // In this case we have to load more data and then append them.
       loadUsers(page - 1).then((r) => {});
     }
   };
@@ -415,8 +423,6 @@ const UsersTable = () => {
   const fetchGroups = async () => {
     try {
       let res = await API.get(`/api/group/`);
-      // add 'all' option
-      // res.data.data.unshift('all');
       if (res === undefined) {
         return;
       }
@@ -452,34 +458,34 @@ const UsersTable = () => {
       >
         <div style={{ display: 'flex' }}>
           <Space>
-          <Form.Input
-            label='搜索关键字'
-            icon='search'
-            field='keyword'
-            iconPosition='left'
-            placeholder='搜索用户的 ID，用户名，显示名称，以及邮箱地址 ...'
-            value={searchKeyword}
-            loading={searching}
-            onChange={(value) => handleKeywordChange(value)}
-          />
-          <Form.Select
-            field='group'
-            label='分组'
-            optionList={groupOptions}
-            onChange={(value) => {
-              setSearchGroup(value);
-              searchUsers(searchKeyword, value);
-            }}
-          />
-          <Button
-            label='查询'
-            type='primary'
-            htmlType='submit'
-            className='btn-margin-right'
-            style={{ marginRight: 8 }}
-          >
-            查询
-          </Button>
+            <Form.Input
+              label={t('components.UsersTable.searchKeyword')}
+              icon='search'
+              field='keyword'
+              iconPosition='left'
+              placeholder={t('components.UsersTable.searchPlaceholder')}
+              value={searchKeyword}
+              loading={searching}
+              onChange={(value) => handleKeywordChange(value)}
+            />
+            <Form.Select
+              field='group'
+              label={t('components.UsersTable.group')}
+              optionList={groupOptions}
+              onChange={(value) => {
+                setSearchGroup(value);
+                searchUsers(searchKeyword, value);
+              }}
+            />
+            <Button
+              label={t('components.UsersTable.query')}
+              type='primary'
+              htmlType='submit'
+              className='btn-margin-right'
+              style={{ marginRight: 8 }}
+            >
+              {t('components.UsersTable.query')}
+            </Button>
           </Space>
         </div>
       </Form>
@@ -504,7 +510,7 @@ const UsersTable = () => {
           setShowAddUser(true);
         }}
       >
-        添加用户
+        {t('components.UsersTable.addUser')}
       </Button>
     </>
   );

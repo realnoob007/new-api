@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   API,
   isMobile,
-  showError,
+  useShowError,
   showSuccess,
   timestamp2string,
 } from '../../helpers';
@@ -23,8 +23,11 @@ import {
 } from '@douyinfe/semi-ui';
 import Title from '@douyinfe/semi-ui/lib/es/typography/title';
 import { Divider } from 'semantic-ui-react';
+import { useTranslation } from 'react-i18next';
 
 const EditToken = (props) => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [isEdit, setIsEdit] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const originInputs = {
@@ -44,15 +47,17 @@ const EditToken = (props) => {
     model_limits_enabled,
     model_limits,
   } = inputs;
-  // const [visible, setVisible] = useState(false);
   const [models, setModels] = useState({});
   const navigate = useNavigate();
+
   const handleInputChange = (name, value) => {
     setInputs((inputs) => ({ ...inputs, [name]: value }));
   };
+
   const handleCancel = () => {
     props.handleClose();
   };
+
   const setExpiredTime = (month, day, hour, minute) => {
     let now = new Date();
     let timestamp = now.getTime() / 1000;
@@ -105,6 +110,7 @@ const EditToken = (props) => {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     setIsEdit(props.editingToken.id !== undefined);
   }, [props.editingToken.id]);
@@ -154,7 +160,7 @@ const EditToken = (props) => {
       if (localInputs.expired_time !== -1) {
         let time = Date.parse(localInputs.expired_time);
         if (isNaN(time)) {
-          showError('过期时间格式错误！');
+          showError(t('pages.Token.EditToken.invalidExpiryTime'));
           setLoading(false);
           return;
         }
@@ -167,7 +173,7 @@ const EditToken = (props) => {
       });
       const { success, message } = res.data;
       if (success) {
-        showSuccess('令牌更新成功！');
+        showSuccess(t('pages.Token.EditToken.tokenUpdateSuccess'));
         props.refresh();
         props.handleClose();
       } else {
@@ -187,7 +193,7 @@ const EditToken = (props) => {
         if (localInputs.expired_time !== -1) {
           let time = Date.parse(localInputs.expired_time);
           if (isNaN(time)) {
-            showError('过期时间格式错误！');
+            showError(t('pages.Token.EditToken.invalidExpiryTime'));
             setLoading(false);
             break;
           }
@@ -207,7 +213,9 @@ const EditToken = (props) => {
 
       if (successCount > 0) {
         showSuccess(
-          `${successCount}个令牌创建成功，请在列表页面点击复制获取令牌！`,
+          t('pages.Token.EditToken.tokenCreationSuccess', {
+            count: successCount,
+          }),
         );
         props.refresh();
         props.handleClose();
@@ -223,7 +231,11 @@ const EditToken = (props) => {
       <SideSheet
         placement={isEdit ? 'right' : 'left'}
         title={
-          <Title level={3}>{isEdit ? '更新令牌信息' : '创建新的令牌'}</Title>
+          <Title level={3}>
+            {isEdit
+              ? t('pages.Token.EditToken.updateTokenInfo')
+              : t('pages.Token.EditToken.createToken')}
+          </Title>
         }
         headerStyle={{ borderBottom: '1px solid var(--semi-color-border)' }}
         bodyStyle={{ borderBottom: '1px solid var(--semi-color-border)' }}
@@ -232,7 +244,7 @@ const EditToken = (props) => {
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Space>
               <Button theme='solid' size={'large'} onClick={submit}>
-                提交
+                {t('pages.Token.EditToken.submit')}
               </Button>
               <Button
                 theme='solid'
@@ -240,7 +252,7 @@ const EditToken = (props) => {
                 type={'tertiary'}
                 onClick={handleCancel}
               >
-                取消
+                {t('pages.Token.EditToken.cancel')}
               </Button>
             </Space>
           </div>
@@ -252,9 +264,9 @@ const EditToken = (props) => {
         <Spin spinning={loading}>
           <Input
             style={{ marginTop: 20 }}
-            label='名称'
+            label={t('pages.Token.EditToken.name')}
             name='name'
-            placeholder={'请输入名称'}
+            placeholder={t('pages.Token.EditToken.namePlaceholder')}
             onChange={(value) => handleInputChange('name', value)}
             value={name}
             autoComplete='new-password'
@@ -262,9 +274,9 @@ const EditToken = (props) => {
           />
           <Divider />
           <DatePicker
-            label='过期时间'
+            label={t('pages.Token.EditToken.expiryTime')}
             name='expired_time'
-            placeholder={'请选择过期时间'}
+            placeholder={t('pages.Token.EditToken.expiryTimePlaceholder')}
             onChange={(value) => handleInputChange('expired_time', value)}
             value={expired_time}
             autoComplete='new-password'
@@ -278,7 +290,7 @@ const EditToken = (props) => {
                   setExpiredTime(0, 0, 0, 0);
                 }}
               >
-                永不过期
+                {t('pages.Token.EditToken.neverExpire')}
               </Button>
               <Button
                 type={'tertiary'}
@@ -286,7 +298,7 @@ const EditToken = (props) => {
                   setExpiredTime(0, 0, 1, 0);
                 }}
               >
-                一小时
+                {t('pages.Token.EditToken.oneHour')}
               </Button>
               <Button
                 type={'tertiary'}
@@ -294,7 +306,7 @@ const EditToken = (props) => {
                   setExpiredTime(1, 0, 0, 0);
                 }}
               >
-                一个月
+                {t('pages.Token.EditToken.oneMonth')}
               </Button>
               <Button
                 type={'tertiary'}
@@ -302,7 +314,7 @@ const EditToken = (props) => {
                   setExpiredTime(0, 1, 0, 0);
                 }}
               >
-                一天
+                {t('pages.Token.EditToken.oneDay')}
               </Button>
             </Space>
           </div>
@@ -310,22 +322,19 @@ const EditToken = (props) => {
           <Divider />
           <Banner
             type={'warning'}
-            description={
-              '注意，令牌的额度仅用于限制令牌本身的最大额度使用量，实际的使用受到账户的剩余额度限制。'
-            }
+            description={t('pages.Token.EditToken.quotaWarning')}
           ></Banner>
           <div style={{ marginTop: 20 }}>
-            <Typography.Text>{`额度${renderQuotaWithPrompt(remain_quota)}`}</Typography.Text>
+            <Typography.Text>{`${t('pages.Token.EditToken.quota')}${renderQuotaWithPrompt(remain_quota)}`}</Typography.Text>
           </div>
           <AutoComplete
             style={{ marginTop: 8 }}
             name='remain_quota'
-            placeholder={'请输入额度'}
+            placeholder={t('pages.Token.EditToken.quotaPlaceholder')}
             onChange={(value) => handleInputChange('remain_quota', value)}
             value={remain_quota}
             autoComplete='new-password'
             type='number'
-            // position={'top'}
             data={[
               { value: 500000, label: '1$' },
               { value: 5000000, label: '10$' },
@@ -340,22 +349,27 @@ const EditToken = (props) => {
           {!isEdit && (
             <>
               <div style={{ marginTop: 20 }}>
-                <Typography.Text>新建数量</Typography.Text>
+                <Typography.Text>
+                  {t('pages.Token.EditToken.tokenCount')}
+                </Typography.Text>
               </div>
               <AutoComplete
                 style={{ marginTop: 8 }}
-                label='数量'
-                placeholder={'请选择或输入创建令牌的数量'}
+                label={t('pages.Token.EditToken.count')}
+                placeholder={t('pages.Token.EditToken.tokenCountPlaceholder')}
                 onChange={(value) => handleTokenCountChange(value)}
                 onSelect={(value) => handleTokenCountChange(value)}
                 value={tokenCount.toString()}
                 autoComplete='off'
                 type='number'
                 data={[
-                  { value: 10, label: '10个' },
-                  { value: 20, label: '20个' },
-                  { value: 30, label: '30个' },
-                  { value: 100, label: '100个' },
+                  { value: 10, label: t('pages.Token.EditToken.tenTokens') },
+                  { value: 20, label: t('pages.Token.EditToken.twentyTokens') },
+                  { value: 30, label: t('pages.Token.EditToken.thirtyTokens') },
+                  {
+                    value: 100,
+                    label: t('pages.Token.EditToken.hundredTokens'),
+                  },
                 ]}
                 disabled={unlimited_quota}
               />
@@ -370,7 +384,9 @@ const EditToken = (props) => {
                 setUnlimitedQuota();
               }}
             >
-              {unlimited_quota ? '取消无限额度' : '设为无限额度'}
+              {unlimited_quota
+                ? t('pages.Token.EditToken.cancelUnlimitedQuota')
+                : t('pages.Token.EditToken.setUnlimitedQuota')}
             </Button>
           </div>
           <Divider />
@@ -384,14 +400,14 @@ const EditToken = (props) => {
                 }
               ></Checkbox>
               <Typography.Text>
-                启用模型限制（非必要，不建议启用）
+                {t('pages.Token.EditToken.enableModelLimits')}
               </Typography.Text>
             </Space>
           </div>
 
           <Select
             style={{ marginTop: 8 }}
-            placeholder={'请选择该渠道所支持的模型'}
+            placeholder={t('pages.Token.EditToken.selectModels')}
             name='models'
             required
             multiple

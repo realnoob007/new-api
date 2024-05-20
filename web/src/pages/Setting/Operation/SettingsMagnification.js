@@ -3,13 +3,16 @@ import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
-  showError,
+  useShowError,
   showSuccess,
   showWarning,
   verifyJSON,
 } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsMagnification(props) {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     ModelPrice: '',
@@ -24,7 +27,10 @@ export default function SettingsMagnification(props) {
     try {
       await refForm.current.validate();
       const updateArray = compareObjects(inputs, inputsRow);
-      if (!updateArray.length) return showWarning('你似乎并没有修改什么');
+      if (!updateArray.length)
+        return showWarning(
+          t('pages.Setting.Operation.SettingsMagnification.noChanges'),
+        );
       const requestQueue = updateArray.map((item) => {
         let value = '';
         if (typeof inputs[item.key] === 'boolean') {
@@ -44,19 +50,27 @@ export default function SettingsMagnification(props) {
             if (res.includes(undefined)) return;
           } else if (requestQueue.length > 1) {
             if (res.includes(undefined))
-              return showError('部分保存失败，请重试');
+              return showError(
+                t(
+                  'pages.Setting.Operation.SettingsMagnification.partialSaveFailure',
+                ),
+              );
           }
-          showSuccess('保存成功');
+          showSuccess(
+            t('pages.Setting.Operation.SettingsMagnification.saveSuccess'),
+          );
           props.refresh();
         })
         .catch(() => {
-          showError('保存失败，请重试');
+          showError(
+            t('pages.Setting.Operation.SettingsMagnification.saveFailure'),
+          );
         })
         .finally(() => {
           setLoading(false);
         });
     } catch (error) {
-      showError('请检查输入');
+      showError(t('pages.Setting.Operation.SettingsMagnification.checkInput'));
       console.error(error);
     } finally {
     }
@@ -81,22 +95,32 @@ export default function SettingsMagnification(props) {
           getFormApi={(formAPI) => (refForm.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'倍率设置'}>
+          <Form.Section
+            text={t(
+              'pages.Setting.Operation.SettingsMagnification.magnificationSettings',
+            )}
+          >
             <Row gutter={16}>
               <Col span={16}>
                 <Form.TextArea
-                  label={'模型固定价格'}
-                  extraText={'一次调用消耗多少刀，优先级大于模型倍率'}
-                  placeholder={
-                    '为一个 JSON 文本，键为模型名称，值为一次调用消耗多少刀，比如 "gpt-4-gizmo-*": 0.1，一次消耗0.1刀'
-                  }
+                  label={t(
+                    'pages.Setting.Operation.SettingsMagnification.modelPrice',
+                  )}
+                  extraText={t(
+                    'pages.Setting.Operation.SettingsMagnification.modelPriceExtra',
+                  )}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsMagnification.modelPricePlaceholder',
+                  )}
                   field={'ModelPrice'}
                   autosize={{ minRows: 6, maxRows: 12 }}
                   trigger='blur'
                   rules={[
                     {
                       validator: (rule, value) => verifyJSON(value),
-                      message: '不是合法的 JSON 字符串',
+                      message: t(
+                        'pages.Setting.Operation.SettingsMagnification.invalidJSON',
+                      ),
                     },
                   ]}
                   onChange={(value) =>
@@ -111,16 +135,22 @@ export default function SettingsMagnification(props) {
             <Row gutter={16}>
               <Col span={16}>
                 <Form.TextArea
-                  label={'模型倍率'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsMagnification.modelRatio',
+                  )}
                   extraText={''}
-                  placeholder={'为一个 JSON 文本，键为模型名称，值为倍率'}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsMagnification.modelRatioPlaceholder',
+                  )}
                   field={'ModelRatio'}
                   autosize={{ minRows: 6, maxRows: 12 }}
                   trigger='blur'
                   rules={[
                     {
                       validator: (rule, value) => verifyJSON(value),
-                      message: '不是合法的 JSON 字符串',
+                      message: t(
+                        'pages.Setting.Operation.SettingsMagnification.invalidJSON',
+                      ),
                     },
                   ]}
                   onChange={(value) =>
@@ -135,16 +165,24 @@ export default function SettingsMagnification(props) {
             <Row gutter={16}>
               <Col span={16}>
                 <Form.TextArea
-                  label={'模型补全倍率（仅对自定义模型有效）'}
-                  extraText={'仅对自定义模型有效'}
-                  placeholder={'为一个 JSON 文本，键为模型名称，值为倍率'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsMagnification.completionRatio',
+                  )}
+                  extraText={t(
+                    'pages.Setting.Operation.SettingsMagnification.completionRatioExtra',
+                  )}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsMagnification.completionRatioPlaceholder',
+                  )}
                   field={'CompletionRatio'}
                   autosize={{ minRows: 6, maxRows: 12 }}
                   trigger='blur'
                   rules={[
                     {
                       validator: (rule, value) => verifyJSON(value),
-                      message: '不是合法的 JSON 字符串',
+                      message: t(
+                        'pages.Setting.Operation.SettingsMagnification.invalidJSON',
+                      ),
                     },
                   ]}
                   onChange={(value) =>
@@ -159,16 +197,22 @@ export default function SettingsMagnification(props) {
             <Row gutter={16}>
               <Col span={16}>
                 <Form.TextArea
-                  label={'分组倍率'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsMagnification.groupRatio',
+                  )}
                   extraText={''}
-                  placeholder={'为一个 JSON 文本，键为分组名称，值为倍率'}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsMagnification.groupRatioPlaceholder',
+                  )}
                   field={'GroupRatio'}
                   autosize={{ minRows: 6, maxRows: 12 }}
                   trigger='blur'
                   rules={[
                     {
                       validator: (rule, value) => verifyJSON(value),
-                      message: '不是合法的 JSON 字符串',
+                      message: t(
+                        'pages.Setting.Operation.SettingsMagnification.invalidJSON',
+                      ),
                     },
                   ]}
                   onChange={(value) =>
@@ -183,7 +227,9 @@ export default function SettingsMagnification(props) {
 
             <Row>
               <Button size='large' onClick={onSubmit}>
-                保存倍率设置
+                {t(
+                  'pages.Setting.Operation.SettingsMagnification.saveMagnificationSettings',
+                )}
               </Button>
             </Row>
           </Form.Section>

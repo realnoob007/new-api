@@ -2,6 +2,7 @@ import { Toast } from '@douyinfe/semi-ui';
 import { toastConstants } from '../constants';
 import React from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const HTMLToastContent = ({ htmlContent }) => {
   return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
@@ -99,6 +100,42 @@ export function showError(error) {
   } else {
     Toast.error('错误：' + error);
   }
+}
+
+export function useShowError() {
+  const { t } = useTranslation();
+
+  return (error) => {
+    let translatedMessage;
+
+    if (error.message) {
+      if (error.name === 'AxiosError') {
+        switch (error.response.status) {
+          case 401:
+            // translatedMessage = t('errors.unauthorized');
+            window.location.href = '/login?expired=true';
+            return;
+          case 429:
+            translatedMessage = t('errors.tooManyRequests');
+            break;
+          case 500:
+            translatedMessage = t('errors.internalServerError');
+            break;
+          case 405:
+            translatedMessage = t('errors.demoSite');
+            break;
+          default:
+            translatedMessage = t('errors.default', { message: error.message });
+        }
+      } else {
+        translatedMessage = t('errors.default', { message: error.message });
+      }
+    } else {
+      translatedMessage = t('errors.default', { message: error });
+    }
+
+    Toast.error(translatedMessage);
+  };
 }
 
 export function showWarning(message) {

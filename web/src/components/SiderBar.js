@@ -9,7 +9,7 @@ import {
   getSystemName,
   isAdmin,
   isMobile,
-  showError,
+  useShowError,
 } from '../helpers';
 import '../index.css';
 
@@ -29,10 +29,11 @@ import {
 } from '@douyinfe/semi-icons';
 import { Layout, Nav } from '@douyinfe/semi-ui';
 import { setStatusData } from '../helpers/data.js';
-
-// HeaderBar Buttons
+import { useTranslation } from 'react-i18next';
 
 const SiderBar = () => {
+  const showError = useShowError();
+  const { t, i18n } = useTranslation();
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState, statusDispatch] = useContext(StatusContext);
   const defaultIsCollapsed =
@@ -63,20 +64,20 @@ const SiderBar = () => {
   const headerButtons = useMemo(
     () => [
       {
-        text: '首页',
+        text: t('components.SiderBar.home'),
         itemKey: 'home',
         to: '/',
         icon: <IconHome />,
       },
       {
-        text: '渠道',
+        text: t('components.SiderBar.channel'),
         itemKey: 'channel',
         to: '/channel',
         icon: <IconLayers />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
-        text: '聊天',
+        text: t('components.SiderBar.chat'),
         itemKey: 'chat',
         to: '/chat',
         icon: <IconComment />,
@@ -85,45 +86,45 @@ const SiderBar = () => {
           : 'tableHiddle',
       },
       {
-        text: '令牌',
+        text: t('components.SiderBar.token'),
         itemKey: 'token',
         to: '/token',
         icon: <IconKey />,
       },
       {
-        text: '兑换码',
+        text: t('components.SiderBar.redemption'),
         itemKey: 'redemption',
         to: '/redemption',
         icon: <IconGift />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
-        text: '钱包',
+        text: t('components.SiderBar.wallet'),
         itemKey: 'topup',
         to: '/topup',
         icon: <IconCreditCard />,
       },
       {
-        text: '模型价格',
+        text: t('components.SiderBar.pricing'),
         itemKey: 'pricing',
         to: '/pricing',
         icon: <IconPriceTag />,
       },
       {
-        text: '用户管理',
+        text: t('components.SiderBar.userManagement'),
         itemKey: 'user',
         to: '/user',
         icon: <IconUser />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
-        text: '日志',
+        text: t('components.SiderBar.log'),
         itemKey: 'log',
         to: '/log',
         icon: <IconHistogram />,
       },
       {
-        text: '数据看板',
+        text: t('components.SiderBar.dashboard'),
         itemKey: 'detail',
         to: '/detail',
         icon: <IconCalendarClock />,
@@ -133,7 +134,7 @@ const SiderBar = () => {
             : 'tableHiddle',
       },
       {
-        text: '绘图',
+        text: t('components.SiderBar.drawing'),
         itemKey: 'midjourney',
         to: '/midjourney',
         icon: <IconImage />,
@@ -143,19 +144,14 @@ const SiderBar = () => {
             : 'tableHiddle',
       },
       {
-        text: '设置',
+        text: t('components.SiderBar.settings'),
         itemKey: 'setting',
         to: '/setting',
         icon: <IconSetting />,
       },
-      // {
-      //     text: '关于',
-      //     itemKey: 'about',
-      //     to: '/about',
-      //     icon: <IconAt/>
-      // }
     ],
     [
+      i18n.language,
       localStorage.getItem('enable_data_export'),
       localStorage.getItem('enable_drawing'),
       localStorage.getItem('chat_link'),
@@ -173,7 +169,7 @@ const SiderBar = () => {
       statusDispatch({ type: 'set', payload: data });
       setStatusData(data);
     } else {
-      showError('无法正常连接至服务器！');
+      showError(t('components.SiderBar.serverError'));
     }
   };
 
@@ -196,7 +192,6 @@ const SiderBar = () => {
       <Layout>
         <div style={{ height: '100%' }}>
           <Nav
-            // bodyStyle={{ maxWidth: 200 }}
             style={{ maxWidth: 200 }}
             defaultIsCollapsed={
               isMobile() ||
@@ -227,9 +222,6 @@ const SiderBar = () => {
               ),
               text: systemName,
             }}
-            // footer={{
-            //   text: '© 2021 NekoAPI',
-            // }}
           >
             <Nav.Footer collapseButton={true}></Nav.Footer>
           </Nav>

@@ -3,12 +3,15 @@ import { Button, Col, Form, Row, Spin, Tag } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
-  showError,
+  useShowError,
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsDrawing(props) {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     DrawingEnabled: false,
@@ -22,7 +25,10 @@ export default function SettingsDrawing(props) {
 
   function onSubmit() {
     const updateArray = compareObjects(inputs, inputsRow);
-    if (!updateArray.length) return showWarning('你似乎并没有修改什么');
+    if (!updateArray.length)
+      return showWarning(
+        t('pages.Setting.Operation.SettingsDrawing.noChanges'),
+      );
     const requestQueue = updateArray.map((item) => {
       let value = '';
       if (typeof inputs[item.key] === 'boolean') {
@@ -41,13 +47,16 @@ export default function SettingsDrawing(props) {
         if (requestQueue.length === 1) {
           if (res.includes(undefined)) return;
         } else if (requestQueue.length > 1) {
-          if (res.includes(undefined)) return showError('部分保存失败，请重试');
+          if (res.includes(undefined))
+            return showError(
+              t('pages.Setting.Operation.SettingsDrawing.partialSaveFailure'),
+            );
         }
-        showSuccess('保存成功');
+        showSuccess(t('pages.Setting.Operation.SettingsDrawing.saveSuccess'));
         props.refresh();
       })
       .catch(() => {
-        showError('保存失败，请重试');
+        showError(t('pages.Setting.Operation.SettingsDrawing.saveFailure'));
       })
       .finally(() => {
         setLoading(false);
@@ -74,12 +83,16 @@ export default function SettingsDrawing(props) {
           getFormApi={(formAPI) => (refForm.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'绘图设置'}>
+          <Form.Section
+            text={t('pages.Setting.Operation.SettingsDrawing.drawingSettings')}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Switch
                   field={'DrawingEnabled'}
-                  label={'启用绘图功能'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsDrawing.enableDrawingFeature',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -94,7 +107,9 @@ export default function SettingsDrawing(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'MjNotifyEnabled'}
-                  label={'允许回调（会泄露服务器 IP 地址）'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsDrawing.allowCallback',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -109,7 +124,9 @@ export default function SettingsDrawing(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'MjAccountFilterEnabled'}
-                  label={'允许 AccountFilter 参数'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsDrawing.allowAccountFilter',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -124,7 +141,9 @@ export default function SettingsDrawing(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'MjForwardUrlEnabled'}
-                  label={'开启之后将上游地址替换为服务器地址'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsDrawing.enableForwardUrl',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -141,8 +160,11 @@ export default function SettingsDrawing(props) {
                   field={'MjModeClearEnabled'}
                   label={
                     <>
-                      开启之后会清除用户提示词中的 <Tag>--fast</Tag> 、
-                      <Tag>--relax</Tag> 以及 <Tag>--turbo</Tag> 参数
+                      {t(
+                        'pages.Setting.Operation.SettingsDrawing.enableModeClear',
+                      )}
+                      <Tag>--fast</Tag>、<Tag>--relax</Tag>、<Tag>--turbo</Tag>
+                      {t('pages.Setting.Operation.SettingsDrawing.parameters')}
                     </>
                   }
                   size='large'
@@ -159,7 +181,9 @@ export default function SettingsDrawing(props) {
             </Row>
             <Row>
               <Button size='large' onClick={onSubmit}>
-                保存绘图设置
+                {t(
+                  'pages.Setting.Operation.SettingsDrawing.saveDrawingSettings',
+                )}
               </Button>
             </Row>
           </Form.Section>

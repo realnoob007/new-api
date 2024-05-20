@@ -9,10 +9,13 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { API, getLogo, showError, showInfo, showSuccess } from '../helpers';
+import { API, getLogo, useShowError, showInfo, showSuccess } from '../helpers';
 import Turnstile from 'react-turnstile';
+import { useTranslation } from 'react-i18next';
 
 const RegisterForm = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [inputs, setInputs] = useState({
     username: '',
     password: '',
@@ -54,16 +57,16 @@ const RegisterForm = () => {
 
   async function handleSubmit(e) {
     if (password.length < 8) {
-      showInfo('密码长度不得小于 8 位！');
+      showInfo(t('components.RegisterForm.shortPassword'));
       return;
     }
     if (password !== password2) {
-      showInfo('两次输入的密码不一致');
+      showInfo(t('components.RegisterForm.passwordMismatch'));
       return;
     }
     if (username && password) {
       if (turnstileEnabled && turnstileToken === '') {
-        showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
+        showInfo(t('components.RegisterForm.turnstileCheck'));
         return;
       }
       setLoading(true);
@@ -78,7 +81,7 @@ const RegisterForm = () => {
       const { success, message } = res.data;
       if (success) {
         navigate('/login');
-        showSuccess('注册成功！');
+        showSuccess(t('components.RegisterForm.registrationSuccess'));
       } else {
         showError(message);
       }
@@ -89,7 +92,7 @@ const RegisterForm = () => {
   const sendVerificationCode = async () => {
     if (inputs.email === '') return;
     if (turnstileEnabled && turnstileToken === '') {
-      showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
+      showInfo(t('components.RegisterForm.turnstileCheck'));
       return;
     }
     setLoading(true);
@@ -98,7 +101,7 @@ const RegisterForm = () => {
     );
     const { success, message } = res.data;
     if (success) {
-      showSuccess('验证码发送成功，请检查你的邮箱！');
+      showSuccess(t('components.RegisterForm.verificationCodeSent'));
     } else {
       showError(message);
     }
@@ -109,7 +112,7 @@ const RegisterForm = () => {
     <Grid textAlign='center' style={{ marginTop: '48px' }}>
       <Grid.Column style={{ maxWidth: 450 }}>
         <Header as='h2' color='' textAlign='center'>
-          <Image src={logo} /> 新用户注册
+          <Image src={logo} /> {t('components.RegisterForm.newUserRegister')}
         </Header>
         <Form size='large'>
           <Segment>
@@ -117,7 +120,7 @@ const RegisterForm = () => {
               fluid
               icon='user'
               iconPosition='left'
-              placeholder='输入用户名，最长 12 位'
+              placeholder={t('components.RegisterForm.enterUsername')}
               onChange={handleChange}
               name='username'
             />
@@ -125,7 +128,7 @@ const RegisterForm = () => {
               fluid
               icon='lock'
               iconPosition='left'
-              placeholder='输入密码，最短 8 位，最长 20 位'
+              placeholder={t('components.RegisterForm.enterPassword')}
               onChange={handleChange}
               name='password'
               type='password'
@@ -134,7 +137,7 @@ const RegisterForm = () => {
               fluid
               icon='lock'
               iconPosition='left'
-              placeholder='输入密码，最短 8 位，最长 20 位'
+              placeholder={t('components.RegisterForm.confirmPassword')}
               onChange={handleChange}
               name='password2'
               type='password'
@@ -145,13 +148,13 @@ const RegisterForm = () => {
                   fluid
                   icon='mail'
                   iconPosition='left'
-                  placeholder='输入邮箱地址'
+                  placeholder={t('components.RegisterForm.enterEmail')}
                   onChange={handleChange}
                   name='email'
                   type='email'
                   action={
                     <Button onClick={sendVerificationCode} disabled={loading}>
-                      获取验证码
+                      {t('components.RegisterForm.getVerificationCode')}
                     </Button>
                   }
                 />
@@ -159,7 +162,9 @@ const RegisterForm = () => {
                   fluid
                   icon='lock'
                   iconPosition='left'
-                  placeholder='输入验证码'
+                  placeholder={t(
+                    'components.RegisterForm.enterVerificationCode',
+                  )}
                   onChange={handleChange}
                   name='verification_code'
                 />
@@ -184,14 +189,14 @@ const RegisterForm = () => {
               onClick={handleSubmit}
               loading={loading}
             >
-              注册
+              {t('components.RegisterForm.register')}
             </Button>
           </Segment>
         </Form>
         <Message>
-          已有账户？
+          {t('components.RegisterForm.haveAccount')}
           <Link to='/login' className='btn btn-link'>
-            点击登录
+            {t('components.RegisterForm.clickToLogin')}
           </Link>
         </Message>
       </Grid.Column>

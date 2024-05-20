@@ -9,8 +9,16 @@ import '../index.css';
 import fireworks from 'react-fireworks';
 
 import { IconHelpCircle, IconKey, IconUser } from '@douyinfe/semi-icons';
-import { Avatar, Dropdown, Layout, Nav, Switch } from '@douyinfe/semi-ui';
+import {
+  Avatar,
+  Dropdown,
+  Layout,
+  Nav,
+  Switch,
+  Select,
+} from '@douyinfe/semi-ui';
 import { stringToColor } from '../helpers/render';
+import { useTranslation } from 'react-i18next';
 
 // HeaderBar Buttons
 let headerButtons = [
@@ -31,6 +39,7 @@ if (localStorage.getItem('chat_link')) {
 }
 
 const HeaderBar = () => {
+  const { t, i18n } = useTranslation();
   const [userState, userDispatch] = useContext(UserContext);
   let navigate = useNavigate();
 
@@ -48,7 +57,7 @@ const HeaderBar = () => {
   async function logout() {
     setShowSidebar(false);
     await API.get('/api/user/logout');
-    showSuccess('注销成功!');
+    showSuccess(t('components.HeaderBar.success.logout'));
     userDispatch({ type: 'logout' });
     localStorage.removeItem('user');
     navigate('/login');
@@ -101,7 +110,6 @@ const HeaderBar = () => {
               );
             }}
             selectedKeys={[]}
-            // items={headerButtons}
             onSelect={(key) => {}}
             footer={
               <>
@@ -112,7 +120,7 @@ const HeaderBar = () => {
                     render={
                       <Dropdown.Menu>
                         <Dropdown.Item onClick={handleNewYearClick}>
-                          Happy New Year!!!
+                          {t('components.HeaderBar.happyNewYear')}
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     }
@@ -120,6 +128,14 @@ const HeaderBar = () => {
                     <Nav.Item itemKey={'new-year'} text={'🏮'} />
                   </Dropdown>
                 )}
+                <Select
+                  defaultValue={i18n.language}
+                  style={{ width: 120 }}
+                  onChange={i18n.changeLanguage}
+                >
+                  <Select.Option value='zh'>中文</Select.Option>
+                  <Select.Option value='en'>English</Select.Option>
+                </Select>
                 <Nav.Item itemKey={'about'} icon={<IconHelpCircle />} />
                 <Switch
                   checkedText='🌞'
@@ -136,7 +152,9 @@ const HeaderBar = () => {
                       position='bottomRight'
                       render={
                         <Dropdown.Menu>
-                          <Dropdown.Item onClick={logout}>退出</Dropdown.Item>
+                          <Dropdown.Item onClick={logout}>
+                            {t('components.HeaderBar.buttons.logout')}
+                          </Dropdown.Item>
                         </Dropdown.Menu>
                       }
                     >
@@ -154,12 +172,12 @@ const HeaderBar = () => {
                   <>
                     <Nav.Item
                       itemKey={'login'}
-                      text={'登录'}
+                      text={t('components.HeaderBar.buttons.login')}
                       icon={<IconKey />}
                     />
                     <Nav.Item
                       itemKey={'register'}
-                      text={'注册'}
+                      text={t('components.HeaderBar.buttons.register')}
                       icon={<IconUser />}
                     />
                   </>

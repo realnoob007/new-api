@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Banner, Button, Col, Form, Row } from '@douyinfe/semi-ui';
-import { API, showError, showSuccess } from '../helpers';
+import { API, useShowError, showSuccess } from '../helpers';
 import { marked } from 'marked';
+import { useTranslation } from 'react-i18next';
 
 const OtherSetting = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   let [inputs, setInputs] = useState({
     Notice: '',
     SystemName: '',
@@ -54,10 +57,10 @@ const OtherSetting = () => {
     try {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Notice: true }));
       await updateOption('Notice', inputs.Notice);
-      showSuccess('公告已更新');
+      showSuccess(t('components.OtherSetting.noticeUpdated'));
     } catch (error) {
-      console.error('公告更新失败', error);
-      showError('公告更新失败');
+      console.error(t('components.OtherSetting.noticeUpdateFailed'), error);
+      showError(t('components.OtherSetting.noticeUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Notice: false }));
     }
@@ -72,10 +75,10 @@ const OtherSetting = () => {
         SystemName: true,
       }));
       await updateOption('SystemName', inputs.SystemName);
-      showSuccess('系统名称已更新');
+      showSuccess(t('components.OtherSetting.systemNameUpdated'));
     } catch (error) {
-      console.error('系统名称更新失败', error);
-      showError('系统名称更新失败');
+      console.error(t('components.OtherSetting.systemNameUpdateFailed'), error);
+      showError(t('components.OtherSetting.systemNameUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({
         ...loadingInput,
@@ -89,10 +92,10 @@ const OtherSetting = () => {
     try {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Logo: true }));
       await updateOption('Logo', inputs.Logo);
-      showSuccess('Logo 已更新');
+      showSuccess(t('components.OtherSetting.logoUpdated'));
     } catch (error) {
-      console.error('Logo 更新失败', error);
-      showError('Logo 更新失败');
+      console.error(t('components.OtherSetting.logoUpdateFailed'), error);
+      showError(t('components.OtherSetting.logoUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Logo: false }));
     }
@@ -105,10 +108,13 @@ const OtherSetting = () => {
         HomePageContent: true,
       }));
       await updateOption(key, inputs[key]);
-      showSuccess('首页内容已更新');
+      showSuccess(t('components.OtherSetting.homePageContentUpdated'));
     } catch (error) {
-      console.error('首页内容更新失败', error);
-      showError('首页内容更新失败');
+      console.error(
+        t('components.OtherSetting.homePageContentUpdateFailed'),
+        error,
+      );
+      showError(t('components.OtherSetting.homePageContentUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({
         ...loadingInput,
@@ -121,10 +127,10 @@ const OtherSetting = () => {
     try {
       setLoadingInput((loadingInput) => ({ ...loadingInput, About: true }));
       await updateOption('About', inputs.About);
-      showSuccess('关于内容已更新');
+      showSuccess(t('components.OtherSetting.aboutUpdated'));
     } catch (error) {
-      console.error('关于内容更新失败', error);
-      showError('关于内容更新失败');
+      console.error(t('components.OtherSetting.aboutUpdateFailed'), error);
+      showError(t('components.OtherSetting.aboutUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, About: false }));
     }
@@ -134,10 +140,10 @@ const OtherSetting = () => {
     try {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Footer: true }));
       await updateOption('Footer', inputs.Footer);
-      showSuccess('页脚内容已更新');
+      showSuccess(t('components.OtherSetting.footerUpdated'));
     } catch (error) {
-      console.error('页脚内容更新失败', error);
-      showError('页脚内容更新失败');
+      console.error(t('components.OtherSetting.footerUpdateFailed'), error);
+      showError(t('components.OtherSetting.footerUpdateFailed'));
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Footer: false }));
     }
@@ -153,7 +159,7 @@ const OtherSetting = () => {
     );
     const { tag_name, body } = res.data;
     if (tag_name === process.env.REACT_APP_VERSION) {
-      showSuccess(`已是最新版本：${tag_name}`);
+      showSuccess(t('components.OtherSetting.latestVersion', { tag_name }));
     } else {
       setUpdateData({
         tag_name: tag_name,
@@ -193,17 +199,17 @@ const OtherSetting = () => {
           getFormApi={(formAPI) => (formAPISettingGeneral.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'通用设置'}>
+          <Form.Section text={t('components.OtherSetting.generalSettings')}>
             <Form.TextArea
-              label={'公告'}
-              placeholder={'在此输入新的公告内容，支持 Markdown & HTML 代码'}
+              label={t('components.OtherSetting.notice')}
+              placeholder={t('components.OtherSetting.noticePlaceholder')}
               field={'Notice'}
               onChange={handleInputChange}
               style={{ fontFamily: 'JetBrains Mono, Consolas' }}
               autosize={{ minRows: 6, maxRows: 12 }}
             />
             <Button onClick={submitNotice} loading={loadingInput['Notice']}>
-              设置公告
+              {t('components.OtherSetting.setNotice')}
             </Button>
           </Form.Section>
         </Form>
@@ -213,10 +219,12 @@ const OtherSetting = () => {
           getFormApi={(formAPI) => (formAPIPersonalization.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'个性化设置'}>
+          <Form.Section
+            text={t('components.OtherSetting.personalizationSettings')}
+          >
             <Form.Input
-              label={'系统名称'}
-              placeholder={'在此输入系统名称'}
+              label={t('components.OtherSetting.systemName')}
+              placeholder={t('components.OtherSetting.systemNamePlaceholder')}
               field={'SystemName'}
               onChange={handleInputChange}
             />
@@ -224,22 +232,22 @@ const OtherSetting = () => {
               onClick={submitSystemName}
               loading={loadingInput['SystemName']}
             >
-              设置系统名称
+              {t('components.OtherSetting.setSystemName')}
             </Button>
             <Form.Input
-              label={'Logo 图片地址'}
-              placeholder={'在此输入 Logo 图片地址'}
+              label={t('components.OtherSetting.logo')}
+              placeholder={t('components.OtherSetting.logoPlaceholder')}
               field={'Logo'}
               onChange={handleInputChange}
             />
             <Button onClick={submitLogo} loading={loadingInput['Logo']}>
-              设置 Logo
+              {t('components.OtherSetting.setLogo')}
             </Button>
             <Form.TextArea
-              label={'首页内容'}
-              placeholder={
-                '在此输入首页内容，支持 Markdown & HTML 代码，设置后首页的状态信息将不再显示。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为首页。'
-              }
+              label={t('components.OtherSetting.homePageContent')}
+              placeholder={t(
+                'components.OtherSetting.homePageContentPlaceholder',
+              )}
               field={'HomePageContent'}
               onChange={handleInputChange}
               style={{ fontFamily: 'JetBrains Mono, Consolas' }}
@@ -249,39 +257,35 @@ const OtherSetting = () => {
               onClick={() => submitOption('HomePageContent')}
               loading={loadingInput['HomePageContent']}
             >
-              设置首页内容
+              {t('components.OtherSetting.setHomePageContent')}
             </Button>
             <Form.TextArea
-              label={'关于'}
-              placeholder={
-                '在此输入新的关于内容，支持 Markdown & HTML 代码。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为关于页面。'
-              }
+              label={t('components.OtherSetting.about')}
+              placeholder={t('components.OtherSetting.aboutPlaceholder')}
               field={'About'}
               onChange={handleInputChange}
               style={{ fontFamily: 'JetBrains Mono, Consolas' }}
               autosize={{ minRows: 6, maxRows: 12 }}
             />
             <Button onClick={submitAbout} loading={loadingInput['About']}>
-              设置关于
+              {t('components.OtherSetting.setAbout')}
             </Button>
             {/*  */}
             <Banner
               fullMode={false}
               type='info'
-              description='移除 One API 的版权标识必须首先获得授权，项目维护需要花费大量精力，如果本项目对你有意义，请主动支持本项目。'
+              description={t('components.OtherSetting.bannerDescription')}
               closeIcon={null}
               style={{ marginTop: 15 }}
             />
             <Form.Input
-              label={'页脚'}
-              placeholder={
-                '在此输入新的页脚，留空则使用默认页脚，支持 HTML 代码'
-              }
+              label={t('components.OtherSetting.footer')}
+              placeholder={t('components.OtherSetting.footerPlaceholder')}
               field={'Footer'}
               onChange={handleInputChange}
             />
             <Button onClick={submitFooter} loading={loadingInput['Footer']}>
-              设置页脚
+              {t('components.OtherSetting.setFooter')}
             </Button>
           </Form.Section>
         </Form>
@@ -291,16 +295,16 @@ const OtherSetting = () => {
       {/*  onOpen={() => setShowUpdateModal(true)}*/}
       {/*  open={showUpdateModal}*/}
       {/*>*/}
-      {/*  <Modal.Header>新版本：{updateData.tag_name}</Modal.Header>*/}
+      {/*  <Modal.Header>{t('components.OtherSetting.newVersion', { tag_name: updateData.tag_name })}</Modal.Header>*/}
       {/*  <Modal.Content>*/}
       {/*    <Modal.Description>*/}
       {/*      <div dangerouslySetInnerHTML={{ __html: updateData.content }}></div>*/}
       {/*    </Modal.Description>*/}
       {/*  </Modal.Content>*/}
       {/*  <Modal.Actions>*/}
-      {/*    <Button onClick={() => setShowUpdateModal(false)}>关闭</Button>*/}
+      {/*    <Button onClick={() => setShowUpdateModal(false)}>{t('components.OtherSetting.close')}</Button>*/}
       {/*    <Button*/}
-      {/*      content='详情'*/}
+      {/*      content={t('components.OtherSetting.details')}*/}
       {/*      onClick={() => {*/}
       {/*        setShowUpdateModal(false);*/}
       {/*        openGitHubRelease();*/}

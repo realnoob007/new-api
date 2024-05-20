@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { API, copy, showError, showSuccess } from '../helpers';
+import { API, copy, useShowError, showSuccess } from '../helpers';
 
 import {
   Banner,
@@ -14,6 +14,7 @@ import {
 import { stringToColor } from '../helpers/render.js';
 import { UserContext } from '../context/User/index.js';
 import Text from '@douyinfe/semi-ui/lib/es/typography/text';
+import { useTranslation } from 'react-i18next';
 
 function renderQuotaType(type) {
   // Ensure all cases are string literals by adding quotes.
@@ -21,19 +22,19 @@ function renderQuotaType(type) {
     case 1:
       return (
         <Tag color='green' size='large'>
-          按次计费
+          {t('components.ModelPricing.quotaType.perUsage')}
         </Tag>
       );
     case 0:
       return (
         <Tag color='blue' size='large'>
-          按量计费
+          {t('components.ModelPricing.quotaType.perQuantity')}
         </Tag>
       );
     default:
       return (
         <Tag color='white' size='large'>
-          未知
+          {t('components.ModelPricing.quotaType.unknown')}
         </Tag>
       );
   }
@@ -42,18 +43,20 @@ function renderQuotaType(type) {
 function renderAvailable(available) {
   return available ? (
     <Tag color='green' size='large'>
-      可用
+      {t('components.ModelPricing.available')}
     </Tag>
   ) : (
-    <Tooltip content='您所在的分组不可用'>
+    <Tooltip content={t('components.ModelPricing.unavailableTooltip')}>
       <Tag color='red' size='large'>
-        不可用
+        {t('components.ModelPricing.unavailable')}
       </Tag>
     </Tooltip>
   );
 }
 
 const ModelPricing = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [filteredValue, setFilteredValue] = useState([]);
   const compositionRef = useRef({ isComposition: false });
 
@@ -77,7 +80,7 @@ const ModelPricing = () => {
 
   const columns = [
     {
-      title: '可用性',
+      title: t('components.ModelPricing.columns.availability'),
       dataIndex: 'available',
       render: (text, record, index) => {
         return renderAvailable(text);
@@ -87,9 +90,9 @@ const ModelPricing = () => {
     {
       title: (
         <Space>
-          <span>模型名称</span>
+          <span>{t('components.ModelPricing.columns.modelName')}</span>
           <Input
-            placeholder='模糊搜索'
+            placeholder={t('components.ModelPricing.columns.searchPlaceholder')}
             style={{ width: 200 }}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
@@ -118,7 +121,7 @@ const ModelPricing = () => {
       filteredValue,
     },
     {
-      title: '计费类型',
+      title: t('components.ModelPricing.columns.billingType'),
       dataIndex: 'quota_type',
       render: (text, record, index) => {
         return renderQuotaType(parseInt(text));
@@ -126,14 +129,14 @@ const ModelPricing = () => {
       sorter: (a, b) => a.quota_type - b.quota_type,
     },
     {
-      title: '模型倍率',
+      title: t('components.ModelPricing.columns.modelRatio'),
       dataIndex: 'model_ratio',
       render: (text, record, index) => {
         return <div>{record.quota_type === 0 ? text : 'N/A'}</div>;
       },
     },
     {
-      title: '补全倍率',
+      title: t('components.ModelPricing.columns.completionRatio'),
       dataIndex: 'completion_ratio',
       render: (text, record, index) => {
         let ratio = parseFloat(text.toFixed(3));
@@ -141,7 +144,7 @@ const ModelPricing = () => {
       },
     },
     {
-      title: '模型价格',
+      title: t('components.ModelPricing.columns.modelPrice'),
       dataIndex: 'model_price',
       render: (text, record, index) => {
         let content = text;
@@ -154,14 +157,24 @@ const ModelPricing = () => {
             record.group_ratio;
           content = (
             <>
-              <Text>提示 ${inputRatioPrice} / 1M tokens</Text>
+              <Text>
+                {t('components.ModelPricing.columns.promptPrice')} $
+                {inputRatioPrice} / 1M tokens
+              </Text>
               <br />
-              <Text>补全 ${completionRatioPrice} / 1M tokens</Text>
+              <Text>
+                {t('components.ModelPricing.columns.completionPrice')} $
+                {completionRatioPrice} / 1M tokens
+              </Text>
             </>
           );
         } else {
           let price = parseFloat(text) * record.group_ratio;
-          content = <>模型价格：${price}</>;
+          content = (
+            <>
+              {t('components.ModelPricing.columns.modelPriceLabel')} ${price}
+            </>
+          );
         }
         return <div>{content}</div>;
       },
@@ -222,10 +235,13 @@ const ModelPricing = () => {
 
   const copyText = async (text) => {
     if (await copy(text)) {
-      showSuccess('已复制：' + text);
+      showSuccess(t('components.ModelPricing.copySuccess') + text);
     } else {
       // setSearchKeyword(text);
-      Modal.error({ title: '无法复制到剪贴板，请手动复制', content: text });
+      Modal.error({
+        title: t('components.ModelPricing.copyErrorTitle'),
+        content: text,
+      });
     }
   };
 
@@ -239,12 +255,17 @@ const ModelPricing = () => {
         {userState.user ? (
           <Banner
             type='info'
-            description={`您的分组为：${userState.user.group}，分组倍率为：${groupRatio}`}
+            description={t('components.ModelPricing.userGroupInfo', {
+              group: userState.user.group,
+              groupRatio,
+            })}
           />
         ) : (
           <Banner
             type='warning'
-            description={`您还未登陆，显示的价格为默认分组倍率: ${groupRatio}`}
+            description={t('components.ModelPricing.notLoggedIn', {
+              groupRatio,
+            })}
           />
         )}
         <Table

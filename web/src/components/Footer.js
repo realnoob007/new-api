@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 import { getFooterHTML, getSystemName } from '../helpers';
 import { Layout } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
   const systemName = getSystemName();
   const [footer, setFooter] = useState(getFooterHTML());
   let remainCheckTimes = 5;
@@ -44,7 +46,7 @@ const Footer = () => {
             >
               New API {import.meta.env.VITE_REACT_APP_VERSION}{' '}
             </a>
-            由{' '}
+            {t('components.Footer.developedBy')}
             <a
               href='https://github.com/Calcium-Ion'
               target='_blank'
@@ -52,7 +54,7 @@ const Footer = () => {
             >
               Calcium-Ion
             </a>{' '}
-            开发，基于{' '}
+            {t('components.Footer.basedOn')}
             <a
               href='https://github.com/songquanpeng/one-api'
               target='_blank'
@@ -60,11 +62,10 @@ const Footer = () => {
             >
               One API v0.5.4
             </a>{' '}
-            ，本项目根据{' '}
+            {t('components.Footer.licensedUnder')}
             <a href='https://opensource.org/licenses/mit-license.php'>
-              MIT 许可证
-            </a>{' '}
-            授权
+              MIT {t('components.Footer.license')}
+            </a>
           </div>
         )}
       </Layout.Content>

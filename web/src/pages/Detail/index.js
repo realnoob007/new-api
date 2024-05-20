@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { initVChartSemiTheme } from '@visactor/vchart-semi-theme';
-
 import { Button, Col, Form, Layout, Row, Spin } from '@douyinfe/semi-ui';
 import VChart from '@visactor/vchart';
 import {
   API,
   isAdmin,
-  showError,
+  useShowError,
   timestamp2string,
   timestamp2string1,
 } from '../../helpers';
@@ -18,8 +17,11 @@ import {
   renderQuotaNumberWithDigit,
   stringToColor,
 } from '../../helpers/render';
+import { useTranslation } from 'react-i18next';
 
 const Detail = (props) => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const formRef = useRef();
   let now = new Date();
   const [inputs, setInputs] = useState({
@@ -76,7 +78,7 @@ const Detail = (props) => {
     },
     title: {
       visible: true,
-      text: '模型消耗分布',
+      text: t('pages.Detail.modelUsageDistribution'),
       subtext: '0',
     },
     bar: {
@@ -119,7 +121,7 @@ const Detail = (props) => {
           }
           // add to first
           array.unshift({
-            key: '总计',
+            key: t('pages.Detail.total'),
             value: renderQuotaNumberWithDigit(sum, 4),
           });
           return array;
@@ -163,7 +165,7 @@ const Detail = (props) => {
     },
     title: {
       visible: true,
-      text: '模型调用次数占比',
+      text: t('pages.Detail.modelCallProportion'),
     },
     legends: {
       visible: true,
@@ -205,7 +207,7 @@ const Detail = (props) => {
       if (data.length === 0) {
         data.push({
           count: 0,
-          model_name: '无数据',
+          model_name: t('pages.Detail.noData'),
           quota: 0,
           created_at: now.getTime() / 1000,
         });
@@ -297,10 +299,10 @@ const Detail = (props) => {
 
     // sort by count
     pieData.sort((a, b) => b.value - a.value);
-    spec_pie.title.subtext = `总计：${renderNumber(times)}`;
+    spec_pie.title.subtext = `${t('pages.Detail.total')}: ${renderNumber(times)}`;
     spec_pie.data[0].values = pieData;
 
-    spec_line.title.subtext = `总计：${renderQuota(consumeQuota, 2)}`;
+    spec_line.title.subtext = `${t('pages.Detail.total')}: ${renderQuota(consumeQuota, 2)}`;
     spec_line.data[0].values = lineData;
     pieChart.updateSpec(spec_pie);
     lineChart.updateSpec(spec_line);
@@ -332,14 +334,14 @@ const Detail = (props) => {
     <>
       <Layout>
         <Layout.Header>
-          <h3>数据看板</h3>
+          <h3>{t('pages.Detail.dataDashboard')}</h3>
         </Layout.Header>
         <Layout.Content>
           <Form ref={formRef} layout='horizontal' style={{ marginTop: 10 }}>
             <>
               <Form.DatePicker
                 field='start_timestamp'
-                label='起始时间'
+                label={t('pages.Detail.startTime')}
                 style={{ width: 272 }}
                 initValue={start_timestamp}
                 value={start_timestamp}
@@ -352,7 +354,7 @@ const Detail = (props) => {
               <Form.DatePicker
                 field='end_timestamp'
                 fluid
-                label='结束时间'
+                label={t('pages.Detail.endTime')}
                 style={{ width: 272 }}
                 initValue={end_timestamp}
                 value={end_timestamp}
@@ -362,15 +364,15 @@ const Detail = (props) => {
               />
               <Form.Select
                 field='data_export_default_time'
-                label='时间粒度'
+                label={t('pages.Detail.timeGranularity')}
                 style={{ width: 176 }}
                 initValue={dataExportDefaultTime}
-                placeholder={'时间粒度'}
+                placeholder={t('pages.Detail.timeGranularity')}
                 name='data_export_default_time'
                 optionList={[
-                  { label: '小时', value: 'hour' },
-                  { label: '天', value: 'day' },
-                  { label: '周', value: 'week' },
+                  { label: t('pages.Detail.hour'), value: 'hour' },
+                  { label: t('pages.Detail.day'), value: 'day' },
+                  { label: t('pages.Detail.week'), value: 'week' },
                 ]}
                 onChange={(value) =>
                   handleInputChange(value, 'data_export_default_time')
@@ -380,10 +382,10 @@ const Detail = (props) => {
                 <>
                   <Form.Input
                     field='username'
-                    label='用户名称'
+                    label={t('pages.Detail.username')}
                     style={{ width: 176 }}
                     value={username}
-                    placeholder={'可选值'}
+                    placeholder={t('pages.Detail.optional')}
                     name='username'
                     onChange={(value) => handleInputChange(value, 'username')}
                   />
@@ -391,14 +393,14 @@ const Detail = (props) => {
               )}
               <Form.Section>
                 <Button
-                  label='查询'
+                  label={t('pages.Detail.query')}
                   type='primary'
                   htmlType='submit'
                   className='btn-margin-right'
                   onClick={refresh}
                   loading={loading}
                 >
-                  查询
+                  {t('pages.Detail.query')}
                 </Button>
               </Form.Section>
             </>

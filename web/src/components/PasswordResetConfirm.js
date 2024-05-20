@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Grid, Header, Image, Segment } from 'semantic-ui-react';
-import { API, copy, showError, showNotice } from '../helpers';
+import { API, copy, useShowError, showNotice } from '../helpers';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const PasswordResetConfirm = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [inputs, setInputs] = useState({
     email: '',
     token: '',
@@ -53,7 +56,9 @@ const PasswordResetConfirm = () => {
       let password = res.data.data;
       setNewPassword(password);
       await copy(password);
-      showNotice(`新密码已复制到剪贴板：${password}`);
+      showNotice(
+        t('components.PasswordResetConfirm.passwordCopied', { password }),
+      );
     } else {
       showError(message);
     }
@@ -64,7 +69,8 @@ const PasswordResetConfirm = () => {
     <Grid textAlign='center' style={{ marginTop: '48px' }}>
       <Grid.Column style={{ maxWidth: 450 }}>
         <Header as='h2' color='' textAlign='center'>
-          <Image src='/logo.png' /> 密码重置确认
+          <Image src='/logo.png' />{' '}
+          {t('components.PasswordResetConfirm.passwordResetConfirm')}
         </Header>
         <Form size='large'>
           <Segment>
@@ -72,7 +78,9 @@ const PasswordResetConfirm = () => {
               fluid
               icon='mail'
               iconPosition='left'
-              placeholder='邮箱地址'
+              placeholder={t(
+                'components.PasswordResetConfirm.emailPlaceholder',
+              )}
               name='email'
               value={email}
               readOnly
@@ -82,14 +90,20 @@ const PasswordResetConfirm = () => {
                 fluid
                 icon='lock'
                 iconPosition='left'
-                placeholder='新密码'
+                placeholder={t(
+                  'components.PasswordResetConfirm.newPasswordPlaceholder',
+                )}
                 name='newPassword'
                 value={newPassword}
                 readOnly
                 onClick={(e) => {
                   e.target.select();
                   navigator.clipboard.writeText(newPassword);
-                  showNotice(`密码已复制到剪贴板：${newPassword}`);
+                  showNotice(
+                    t('components.PasswordResetConfirm.passwordCopied', {
+                      password: newPassword,
+                    }),
+                  );
                 }}
               />
             )}
@@ -101,7 +115,9 @@ const PasswordResetConfirm = () => {
               loading={loading}
               disabled={disableButton}
             >
-              {disableButton ? `密码重置完成` : '提交'}
+              {disableButton
+                ? t('components.PasswordResetConfirm.resetCompleted')
+                : t('components.PasswordResetConfirm.submit')}
             </Button>
           </Segment>
         </Form>

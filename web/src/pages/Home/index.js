@@ -1,10 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Card, Col, Row } from '@douyinfe/semi-ui';
-import { API, showError, showNotice, timestamp2string } from '../../helpers';
+import { API, useShowError, showNotice, timestamp2string } from '../../helpers';
 import { StatusContext } from '../../context/Status';
 import { marked } from 'marked';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [statusState] = useContext(StatusContext);
   const [homePageContentLoaded, setHomePageContentLoaded] = useState(false);
   const [homePageContent, setHomePageContent] = useState('');
@@ -37,7 +40,7 @@ const Home = () => {
       localStorage.setItem('home_page_content', content);
     } else {
       showError(message);
-      setHomePageContent('加载首页内容失败...');
+      setHomePageContent(t('pages.Home.index.loadHomePageContentError'));
     }
     setHomePageContentLoaded(true);
   };
@@ -58,13 +61,13 @@ const Home = () => {
           <Card
             bordered={false}
             headerLine={false}
-            title='系统状况'
+            title={t('pages.Home.index.systemStatus')}
             bodyStyle={{ padding: '10px 20px' }}
           >
             <Row gutter={16}>
               <Col span={12}>
                 <Card
-                  title='系统信息'
+                  title={t('pages.Home.index.systemInfo')}
                   headerExtraContent={
                     <span
                       style={{
@@ -72,19 +75,22 @@ const Home = () => {
                         color: 'var(--semi-color-text-1)',
                       }}
                     >
-                      系统信息总览
+                      {t('pages.Home.index.systemInfoOverview')}
                     </span>
                   }
                 >
-                  <p>名称：{statusState?.status?.system_name}</p>
                   <p>
-                    版本：
+                    {t('pages.Home.index.name')}
+                    {statusState?.status?.system_name}
+                  </p>
+                  <p>
+                    {t('pages.Home.index.version')}
                     {statusState?.status?.version
                       ? statusState?.status?.version
                       : 'unknown'}
                   </p>
                   <p>
-                    源码：
+                    {t('pages.Home.index.sourceCode')}
                     <a
                       href='https://github.com/songquanpeng/one-api'
                       target='_blank'
@@ -93,12 +99,15 @@ const Home = () => {
                       https://github.com/songquanpeng/one-api
                     </a>
                   </p>
-                  <p>启动时间：{getStartTimeString()}</p>
+                  <p>
+                    {t('pages.Home.index.startTime')}
+                    {getStartTimeString()}
+                  </p>
                 </Card>
               </Col>
               <Col span={12}>
                 <Card
-                  title='系统配置'
+                  title={t('pages.Home.index.systemConfig')}
                   headerExtraContent={
                     <span
                       style={{
@@ -106,39 +115,39 @@ const Home = () => {
                         color: 'var(--semi-color-text-1)',
                       }}
                     >
-                      系统配置总览
+                      {t('pages.Home.index.systemConfigOverview')}
                     </span>
                   }
                 >
                   <p>
-                    邮箱验证：
+                    {t('pages.Home.index.emailVerification')}
                     {statusState?.status?.email_verification === true
-                      ? '已启用'
-                      : '未启用'}
+                      ? t('pages.Home.index.enabled')
+                      : t('pages.Home.index.disabled')}
                   </p>
                   <p>
-                    GitHub 身份验证：
+                    {t('pages.Home.index.githubOAuth')}
                     {statusState?.status?.github_oauth === true
-                      ? '已启用'
-                      : '未启用'}
+                      ? t('pages.Home.index.enabled')
+                      : t('pages.Home.index.disabled')}
                   </p>
                   <p>
-                    微信身份验证：
+                    {t('pages.Home.index.wechatLogin')}
                     {statusState?.status?.wechat_login === true
-                      ? '已启用'
-                      : '未启用'}
+                      ? t('pages.Home.index.enabled')
+                      : t('pages.Home.index.disabled')}
                   </p>
                   <p>
-                    Turnstile 用户校验：
+                    {t('pages.Home.index.turnstileCheck')}
                     {statusState?.status?.turnstile_check === true
-                      ? '已启用'
-                      : '未启用'}
+                      ? t('pages.Home.index.enabled')
+                      : t('pages.Home.index.disabled')}
                   </p>
                   <p>
-                    Telegram 身份验证：
+                    {t('pages.Home.index.telegramOAuth')}
                     {statusState?.status?.telegram_oauth === true
-                      ? '已启用'
-                      : '未启用'}
+                      ? t('pages.Home.index.enabled')
+                      : t('pages.Home.index.disabled')}
                   </p>
                 </Card>
               </Col>

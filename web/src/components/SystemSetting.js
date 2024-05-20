@@ -8,11 +8,13 @@ import {
   Message,
   Modal,
 } from 'semantic-ui-react';
-import { API, removeTrailingSlash, showError, verifyJSON } from '../helpers';
-
+import { API, removeTrailingSlash, useShowError, verifyJSON } from '../helpers';
 import { useTheme } from '../context/Theme';
+import { useTranslation } from 'react-i18next';
 
 const SystemSetting = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   let [inputs, setInputs] = useState({
     PasswordLoginEnabled: '',
     PasswordRegisterEnabled: '',
@@ -47,7 +49,6 @@ const SystemSetting = () => {
     EmailAliasRestrictionEnabled: '',
     SMTPSSLEnabled: '',
     EmailDomainWhitelist: [],
-    // telegram login
     TelegramOAuthEnabled: '',
     TelegramBotToken: '',
     TelegramBotName: '',
@@ -137,7 +138,6 @@ const SystemSetting = () => {
 
   const handleInputChange = async (e, { name, value }) => {
     if (name === 'PasswordLoginEnabled' && inputs[name] === 'true') {
-      // block disabling password login
       setShowPasswordWarningModal(true);
       return;
     }
@@ -174,12 +174,12 @@ const SystemSetting = () => {
 
   const submitPayAddress = async () => {
     if (inputs.ServerAddress === '') {
-      showError('请先填写服务器地址');
+      showError(t('components.SystemSetting.pleaseEnterServerAddress'));
       return;
     }
     if (originInputs['TopupGroupRatio'] !== inputs.TopupGroupRatio) {
       if (!verifyJSON(inputs.TopupGroupRatio)) {
-        showError('充值分组倍率不是合法的 JSON 字符串');
+        showError(t('components.SystemSetting.invalidJsonString'));
         return;
       }
       await updateOption('TopupGroupRatio', inputs.TopupGroupRatio);
@@ -269,7 +269,6 @@ const SystemSetting = () => {
   };
 
   const submitTelegramSettings = async () => {
-    // await updateOption('TelegramOAuthEnabled', inputs.TelegramOAuthEnabled);
     await updateOption('TelegramBotToken', inputs.TelegramBotToken);
     await updateOption('TelegramBotName', inputs.TelegramBotName);
   };
@@ -313,42 +312,46 @@ const SystemSetting = () => {
       <Grid.Column>
         <Form loading={loading} inverted={isDark}>
           <Header as='h3' inverted={isDark}>
-            通用设置
+            {t('components.SystemSetting.generalSettings')}
           </Header>
           <Form.Group widths='equal'>
             <Form.Input
-              label='服务器地址'
-              placeholder='例如：https://yourdomain.com'
+              label={t('components.SystemSetting.serverAddress')}
+              placeholder={t(
+                'components.SystemSetting.serverAddressPlaceholder',
+              )}
               value={inputs.ServerAddress}
               name='ServerAddress'
               onChange={handleInputChange}
             />
           </Form.Group>
           <Form.Button onClick={submitServerAddress}>
-            更新服务器地址
+            {t('components.SystemSetting.updateServerAddress')}
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            支付设置（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）
+            {t('components.SystemSetting.paymentSettings')}
           </Header>
           <Form.Group widths='equal'>
             <Form.Input
-              label='支付地址，不填写则不启用在线支付'
-              placeholder='例如：https://yourdomain.com'
+              label={t('components.SystemSetting.paymentAddress')}
+              placeholder={t(
+                'components.SystemSetting.paymentAddressPlaceholder',
+              )}
               value={inputs.PayAddress}
               name='PayAddress'
               onChange={handleInputChange}
             />
             <Form.Input
-              label='易支付商户ID'
-              placeholder='例如：0001'
+              label={t('components.SystemSetting.epayId')}
+              placeholder={t('components.SystemSetting.epayIdPlaceholder')}
               value={inputs.EpayId}
               name='EpayId'
               onChange={handleInputChange}
             />
             <Form.Input
-              label='易支付商户密钥'
-              placeholder='敏感信息不会发送到前端显示'
+              label={t('components.SystemSetting.epayKey')}
+              placeholder={t('components.SystemSetting.epayKeyPlaceholder')}
               value={inputs.EpayKey}
               name='EpayKey'
               onChange={handleInputChange}
@@ -356,23 +359,25 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Input
-              label='回调地址，不填写则使用上方服务器地址作为回调地址'
-              placeholder='例如：https://yourdomain.com'
+              label={t('components.SystemSetting.callbackAddress')}
+              placeholder={t(
+                'components.SystemSetting.callbackAddressPlaceholder',
+              )}
               value={inputs.CustomCallbackAddress}
               name='CustomCallbackAddress'
               onChange={handleInputChange}
             />
             <Form.Input
-              label='充值价格（x元/美金）'
-              placeholder='例如：7，就是7元/美金'
+              label={t('components.SystemSetting.price')}
+              placeholder={t('components.SystemSetting.pricePlaceholder')}
               value={inputs.Price}
               name='Price'
               min={0}
               onChange={handleInputChange}
             />
             <Form.Input
-              label='最低充值美元数量（以美金为单位，如果使用额度请自行换算！）'
-              placeholder='例如：2，就是最低充值2$'
+              label={t('components.SystemSetting.minTopUp')}
+              placeholder={t('components.SystemSetting.minTopUpPlaceholder')}
               value={inputs.MinTopUp}
               name='MinTopUp'
               min={1}
@@ -381,24 +386,28 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.TextArea
-              label='充值分组倍率'
+              label={t('components.SystemSetting.topUpGroupRatio')}
               name='TopupGroupRatio'
               onChange={handleInputChange}
               style={{ minHeight: 250, fontFamily: 'JetBrains Mono, Consolas' }}
               autoComplete='new-password'
               value={inputs.TopupGroupRatio}
-              placeholder='为一个 JSON 文本，键为组名称，值为倍率'
+              placeholder={t(
+                'components.SystemSetting.topUpGroupRatioPlaceholder',
+              )}
             />
           </Form.Group>
-          <Form.Button onClick={submitPayAddress}>更新支付设置</Form.Button>
+          <Form.Button onClick={submitPayAddress}>
+            {t('components.SystemSetting.updatePaymentSettings')}
+          </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置登录注册
+            {t('components.SystemSetting.loginRegisterSettings')}
           </Header>
           <Form.Group inline>
             <Form.Checkbox
               checked={inputs.PasswordLoginEnabled === 'true'}
-              label='允许通过密码进行登录'
+              label={t('components.SystemSetting.enablePasswordLogin')}
               name='PasswordLoginEnabled'
               onChange={handleInputChange}
             />
@@ -409,15 +418,15 @@ const SystemSetting = () => {
                 size={'tiny'}
                 style={{ maxWidth: '450px' }}
               >
-                <Modal.Header>警告</Modal.Header>
+                <Modal.Header>
+                  {t('components.SystemSetting.warning')}
+                </Modal.Header>
                 <Modal.Content>
-                  <p>
-                    取消密码登录将导致所有未绑定其他登录方式的用户（包括管理员）无法通过密码登录，确认取消？
-                  </p>
+                  <p>{t('components.SystemSetting.passwordLoginWarning')}</p>
                 </Modal.Content>
                 <Modal.Actions>
                   <Button onClick={() => setShowPasswordWarningModal(false)}>
-                    取消
+                    {t('components.SystemSetting.cancel')}
                   </Button>
                   <Button
                     color='yellow'
@@ -426,38 +435,38 @@ const SystemSetting = () => {
                       await updateOption('PasswordLoginEnabled', 'false');
                     }}
                   >
-                    确定
+                    {t('components.SystemSetting.confirm')}
                   </Button>
                 </Modal.Actions>
               </Modal>
             )}
             <Form.Checkbox
               checked={inputs.PasswordRegisterEnabled === 'true'}
-              label='允许通过密码进行注册'
+              label={t('components.SystemSetting.enablePasswordRegister')}
               name='PasswordRegisterEnabled'
               onChange={handleInputChange}
             />
             <Form.Checkbox
               checked={inputs.EmailVerificationEnabled === 'true'}
-              label='通过密码注册时需要进行邮箱验证'
+              label={t('components.SystemSetting.enableEmailVerification')}
               name='EmailVerificationEnabled'
               onChange={handleInputChange}
             />
             <Form.Checkbox
               checked={inputs.GitHubOAuthEnabled === 'true'}
-              label='允许通过 GitHub 账户登录 & 注册'
+              label={t('components.SystemSetting.enableGitHubOAuth')}
               name='GitHubOAuthEnabled'
               onChange={handleInputChange}
             />
             <Form.Checkbox
               checked={inputs.WeChatAuthEnabled === 'true'}
-              label='允许通过微信登录 & 注册'
+              label={t('components.SystemSetting.enableWeChatAuth')}
               name='WeChatAuthEnabled'
               onChange={handleInputChange}
             />
             <Form.Checkbox
               checked={inputs.TelegramOAuthEnabled === 'true'}
-              label='允许通过 Telegram 进行登录'
+              label={t('components.SystemSetting.enableTelegramOAuth')}
               name='TelegramOAuthEnabled'
               onChange={handleInputChange}
             />
@@ -465,27 +474,27 @@ const SystemSetting = () => {
           <Form.Group inline>
             <Form.Checkbox
               checked={inputs.RegisterEnabled === 'true'}
-              label='允许新用户注册（此项为否时，新用户将无法以任何方式进行注册）'
+              label={t('components.SystemSetting.enableRegister')}
               name='RegisterEnabled'
               onChange={handleInputChange}
             />
             <Form.Checkbox
               checked={inputs.TurnstileCheckEnabled === 'true'}
-              label='启用 Turnstile 用户校验'
+              label={t('components.SystemSetting.enableTurnstile')}
               name='TurnstileCheckEnabled'
               onChange={handleInputChange}
             />
           </Form.Group>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置邮箱域名白名单
+            {t('components.SystemSetting.emailDomainWhitelistSettings')}
             <Header.Subheader>
-              用以防止恶意用户利用临时邮箱批量注册
+              {t('components.SystemSetting.emailDomainWhitelistSubheader')}
             </Header.Subheader>
           </Header>
           <Form.Group widths={3}>
             <Form.Checkbox
-              label='启用邮箱域名白名单'
+              label={t('components.SystemSetting.enableEmailDomainWhitelist')}
               name='EmailDomainRestrictionEnabled'
               onChange={handleInputChange}
               checked={inputs.EmailDomainRestrictionEnabled === 'true'}
@@ -493,7 +502,7 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Group widths={3}>
             <Form.Checkbox
-              label='启用邮箱别名限制（例如：ab.cd@gmail.com）'
+              label={t('components.SystemSetting.enableEmailAliasRestriction')}
               name='EmailAliasRestrictionEnabled'
               onChange={handleInputChange}
               checked={inputs.EmailAliasRestrictionEnabled === 'true'}
@@ -501,8 +510,10 @@ const SystemSetting = () => {
           </Form.Group>
           <Form.Group widths={2}>
             <Form.Dropdown
-              label='允许的邮箱域名'
-              placeholder='允许的邮箱域名'
+              label={t('components.SystemSetting.allowedEmailDomains')}
+              placeholder={t(
+                'components.SystemSetting.allowedEmailDomainsPlaceholder',
+              )}
               name='EmailDomainWhitelist'
               required
               fluid
@@ -514,7 +525,7 @@ const SystemSetting = () => {
               options={EmailDomainWhitelist}
             />
             <Form.Input
-              label='添加新的允许的邮箱域名'
+              label={t('components.SystemSetting.addNewAllowedEmailDomain')}
               action={
                 <Button
                   type='button'
@@ -522,7 +533,7 @@ const SystemSetting = () => {
                     submitNewRestrictedDomain();
                   }}
                 >
-                  填入
+                  {t('components.SystemSetting.add')}
                 </Button>
               }
               onKeyDown={(e) => {
@@ -531,7 +542,9 @@ const SystemSetting = () => {
                 }
               }}
               autoComplete='new-password'
-              placeholder='输入新的允许的邮箱域名'
+              placeholder={t(
+                'components.SystemSetting.addNewAllowedEmailDomainPlaceholder',
+              )}
               value={restrictedDomainInput}
               onChange={(e, { value }) => {
                 setRestrictedDomainInput(value);
@@ -539,213 +552,209 @@ const SystemSetting = () => {
             />
           </Form.Group>
           <Form.Button onClick={submitEmailDomainWhitelist}>
-            保存邮箱域名白名单设置
+            {t('components.SystemSetting.saveEmailDomainWhitelistSettings')}
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 SMTP
-            <Header.Subheader>用以支持系统的邮件发送</Header.Subheader>
+            {t('components.SystemSetting.smtpSettings')}
+            <Header.Subheader>
+              {t('components.SystemSetting.smtpSettingsSubheader')}
+            </Header.Subheader>
           </Header>
           <Form.Group widths={3}>
             <Form.Input
-              label='SMTP 服务器地址'
+              label={t('components.SystemSetting.smtpServer')}
               name='SMTPServer'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.SMTPServer}
-              placeholder='例如：smtp.qq.com'
+              placeholder={t('components.SystemSetting.smtpServerPlaceholder')}
             />
             <Form.Input
-              label='SMTP 端口'
+              label={t('components.SystemSetting.smtpPort')}
               name='SMTPPort'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.SMTPPort}
-              placeholder='默认: 587'
+              placeholder={t('components.SystemSetting.smtpPortPlaceholder')}
             />
             <Form.Input
-              label='SMTP 账户'
+              label={t('components.SystemSetting.smtpAccount')}
               name='SMTPAccount'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.SMTPAccount}
-              placeholder='通常是邮箱地址'
+              placeholder={t('components.SystemSetting.smtpAccountPlaceholder')}
             />
           </Form.Group>
           <Form.Group widths={3}>
             <Form.Input
-              label='SMTP 发送者邮箱'
+              label={t('components.SystemSetting.smtpFrom')}
               name='SMTPFrom'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.SMTPFrom}
-              placeholder='通常和邮箱地址保持一致'
+              placeholder={t('components.SystemSetting.smtpFromPlaceholder')}
             />
             <Form.Input
-              label='SMTP 访问凭证'
+              label={t('components.SystemSetting.smtpToken')}
               name='SMTPToken'
               onChange={handleInputChange}
               type='password'
               autoComplete='new-password'
               checked={inputs.RegisterEnabled === 'true'}
-              placeholder='敏感信息不会发送到前端显示'
+              placeholder={t('components.SystemSetting.smtpTokenPlaceholder')}
             />
           </Form.Group>
           <Form.Group widths={3}>
             <Form.Checkbox
-              label='启用SMTP SSL（465端口强制开启）'
+              label={t('components.SystemSetting.enableSmtpSsl')}
               name='SMTPSSLEnabled'
               onChange={handleInputChange}
               checked={inputs.SMTPSSLEnabled === 'true'}
             />
           </Form.Group>
-          <Form.Button onClick={submitSMTP}>保存 SMTP 设置</Form.Button>
+          <Form.Button onClick={submitSMTP}>
+            {t('components.SystemSetting.saveSmtpSettings')}
+          </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 GitHub OAuth App
+            {t('components.SystemSetting.githubOAuthSettings')}
             <Header.Subheader>
-              用以支持通过 GitHub 进行登录注册，
-              <a
-                href='https://github.com/settings/developers'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              管理你的 GitHub OAuth App
+              {t('components.SystemSetting.githubOAuthSettingsSubheader')}
             </Header.Subheader>
           </Header>
           <Message>
-            Homepage URL 填 <code>{inputs.ServerAddress}</code>
-            ，Authorization callback URL 填{' '}
-            <code>{`${inputs.ServerAddress}/oauth/github`}</code>
+            {t('components.SystemSetting.githubOAuthSettingsMessage')}
           </Message>
           <Form.Group widths={3}>
             <Form.Input
-              label='GitHub Client ID'
+              label={t('components.SystemSetting.githubClientId')}
               name='GitHubClientId'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.GitHubClientId}
-              placeholder='输入你注册的 GitHub OAuth APP 的 ID'
+              placeholder={t(
+                'components.SystemSetting.githubClientIdPlaceholder',
+              )}
             />
             <Form.Input
-              label='GitHub Client Secret'
+              label={t('components.SystemSetting.githubClientSecret')}
               name='GitHubClientSecret'
               onChange={handleInputChange}
               type='password'
               autoComplete='new-password'
               value={inputs.GitHubClientSecret}
-              placeholder='敏感信息不会发送到前端显示'
+              placeholder={t(
+                'components.SystemSetting.githubClientSecretPlaceholder',
+              )}
             />
           </Form.Group>
           <Form.Button onClick={submitGitHubOAuth}>
-            保存 GitHub OAuth 设置
+            {t('components.SystemSetting.saveGithubOAuthSettings')}
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 WeChat Server
+            {t('components.SystemSetting.weChatServerSettings')}
             <Header.Subheader>
-              用以支持通过微信进行登录注册，
-              <a
-                href='https://github.com/songquanpeng/wechat-server'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              了解 WeChat Server
+              {t('components.SystemSetting.weChatServerSettingsSubheader')}
             </Header.Subheader>
           </Header>
           <Form.Group widths={3}>
             <Form.Input
-              label='WeChat Server 服务器地址'
+              label={t('components.SystemSetting.weChatServerAddress')}
               name='WeChatServerAddress'
-              placeholder='例如：https://yourdomain.com'
+              placeholder={t(
+                'components.SystemSetting.weChatServerAddressPlaceholder',
+              )}
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.WeChatServerAddress}
             />
             <Form.Input
-              label='WeChat Server 访问凭证'
+              label={t('components.SystemSetting.weChatServerToken')}
               name='WeChatServerToken'
               type='password'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.WeChatServerToken}
-              placeholder='敏感信息不会发送到前端显示'
+              placeholder={t(
+                'components.SystemSetting.weChatServerTokenPlaceholder',
+              )}
             />
             <Form.Input
-              label='微信公众号二维码图片链接'
+              label={t('components.SystemSetting.weChatAccountQRCodeImageUrl')}
               name='WeChatAccountQRCodeImageURL'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.WeChatAccountQRCodeImageURL}
-              placeholder='输入一个图片链接'
+              placeholder={t(
+                'components.SystemSetting.weChatAccountQRCodeImageUrlPlaceholder',
+              )}
             />
           </Form.Group>
           <Form.Button onClick={submitWeChat}>
-            保存 WeChat Server 设置
+            {t('components.SystemSetting.saveWeChatServerSettings')}
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 Telegram 登录
+            {t('components.SystemSetting.telegramLoginSettings')}
           </Header>
           <Form.Group inline>
             <Form.Input
-              label='Telegram Bot Token'
+              label={t('components.SystemSetting.telegramBotToken')}
               name='TelegramBotToken'
               onChange={handleInputChange}
               value={inputs.TelegramBotToken}
-              placeholder='输入你的 Telegram Bot Token'
+              placeholder={t(
+                'components.SystemSetting.telegramBotTokenPlaceholder',
+              )}
             />
             <Form.Input
-              label='Telegram Bot 名称'
+              label={t('components.SystemSetting.telegramBotName')}
               name='TelegramBotName'
               onChange={handleInputChange}
               value={inputs.TelegramBotName}
-              placeholder='输入你的 Telegram Bot 名称'
+              placeholder={t(
+                'components.SystemSetting.telegramBotNamePlaceholder',
+              )}
             />
           </Form.Group>
           <Form.Button onClick={submitTelegramSettings}>
-            保存 Telegram 登录设置
+            {t('components.SystemSetting.saveTelegramLoginSettings')}
           </Form.Button>
           <Divider />
           <Header as='h3' inverted={isDark}>
-            配置 Turnstile
+            {t('components.SystemSetting.turnstileSettings')}
             <Header.Subheader>
-              用以支持用户校验，
-              <a
-                href='https://dash.cloudflare.com/'
-                target='_blank'
-                rel='noreferrer'
-              >
-                点击此处
-              </a>
-              管理你的 Turnstile Sites，推荐选择 Invisible Widget Type
+              {t('components.SystemSetting.turnstileSettingsSubheader')}
             </Header.Subheader>
           </Header>
           <Form.Group widths={3}>
             <Form.Input
-              label='Turnstile Site Key'
+              label={t('components.SystemSetting.turnstileSiteKey')}
               name='TurnstileSiteKey'
               onChange={handleInputChange}
               autoComplete='new-password'
               value={inputs.TurnstileSiteKey}
-              placeholder='输入你注册的 Turnstile Site Key'
+              placeholder={t(
+                'components.SystemSetting.turnstileSiteKeyPlaceholder',
+              )}
             />
             <Form.Input
-              label='Turnstile Secret Key'
+              label={t('components.SystemSetting.turnstileSecretKey')}
               name='TurnstileSecretKey'
               onChange={handleInputChange}
               type='password'
               autoComplete='new-password'
               value={inputs.TurnstileSecretKey}
-              placeholder='敏感信息不会发送到前端显示'
+              placeholder={t(
+                'components.SystemSetting.turnstileSecretKeyPlaceholder',
+              )}
             />
           </Form.Group>
           <Form.Button onClick={submitTurnstile}>
-            保存 Turnstile 设置
+            {t('components.SystemSetting.saveTurnstileSettings')}
           </Form.Button>
         </Form>
       </Grid.Column>

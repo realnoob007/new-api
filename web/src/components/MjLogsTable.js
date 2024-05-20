@@ -3,11 +3,10 @@ import {
   API,
   copy,
   isAdmin,
-  showError,
+  useShowError,
   showSuccess,
   timestamp2string,
 } from '../helpers';
-
 import {
   Banner,
   Button,
@@ -21,6 +20,7 @@ import {
   Typography,
 } from '@douyinfe/semi-ui';
 import { ITEMS_PER_PAGE } from '../constants';
+import { useTranslation } from 'react-i18next';
 
 const colors = [
   'amber',
@@ -41,184 +41,171 @@ const colors = [
 ];
 
 function renderType(type) {
+  const { t } = useTranslation();
   switch (type) {
     case 'IMAGINE':
       return (
         <Tag color='blue' size='large'>
-          绘图
+          {t('components.MjLogsTable.type.imagine')}
         </Tag>
       );
     case 'UPSCALE':
       return (
         <Tag color='orange' size='large'>
-          放大
+          {t('components.MjLogsTable.type.upscale')}
         </Tag>
       );
     case 'VARIATION':
-      return (
-        <Tag color='purple' size='large'>
-          变换
-        </Tag>
-      );
     case 'HIGH_VARIATION':
-      return (
-        <Tag color='purple' size='large'>
-          强变换
-        </Tag>
-      );
     case 'LOW_VARIATION':
       return (
         <Tag color='purple' size='large'>
-          弱变换
+          {t('components.MjLogsTable.type.variation')}
         </Tag>
       );
     case 'PAN':
       return (
         <Tag color='cyan' size='large'>
-          平移
+          {t('components.MjLogsTable.type.pan')}
         </Tag>
       );
     case 'DESCRIBE':
       return (
         <Tag color='yellow' size='large'>
-          图生文
+          {t('components.MjLogsTable.type.describe')}
         </Tag>
       );
     case 'BLEND':
       return (
         <Tag color='lime' size='large'>
-          图混合
+          {t('components.MjLogsTable.type.blend')}
         </Tag>
       );
     case 'SHORTEN':
       return (
         <Tag color='pink' size='large'>
-          缩词
+          {t('components.MjLogsTable.type.shorten')}
         </Tag>
       );
     case 'REROLL':
       return (
         <Tag color='indigo' size='large'>
-          重绘
+          {t('components.MjLogsTable.type.reroll')}
         </Tag>
       );
     case 'INPAINT':
       return (
         <Tag color='violet' size='large'>
-          局部重绘-提交
+          {t('components.MjLogsTable.type.inpaint')}
         </Tag>
       );
     case 'ZOOM':
-      return (
-        <Tag color='teal' size='large'>
-          变焦
-        </Tag>
-      );
     case 'CUSTOM_ZOOM':
       return (
         <Tag color='teal' size='large'>
-          自定义变焦-提交
+          {t('components.MjLogsTable.type.zoom')}
         </Tag>
       );
     case 'MODAL':
       return (
         <Tag color='green' size='large'>
-          窗口处理
+          {t('components.MjLogsTable.type.modal')}
         </Tag>
       );
     case 'SWAP_FACE':
       return (
         <Tag color='light-green' size='large'>
-          换脸
+          {t('components.MjLogsTable.type.swapFace')}
         </Tag>
       );
     default:
       return (
         <Tag color='white' size='large'>
-          未知
+          {t('components.MjLogsTable.type.unknown')}
         </Tag>
       );
   }
 }
 
 function renderCode(code) {
+  const { t } = useTranslation();
   switch (code) {
     case 1:
       return (
         <Tag color='green' size='large'>
-          已提交
+          {t('components.MjLogsTable.code.submitted')}
         </Tag>
       );
     case 21:
       return (
         <Tag color='lime' size='large'>
-          等待中
+          {t('components.MjLogsTable.code.waiting')}
         </Tag>
       );
     case 22:
       return (
         <Tag color='orange' size='large'>
-          重复提交
+          {t('components.MjLogsTable.code.duplicateSubmission')}
         </Tag>
       );
     case 0:
       return (
         <Tag color='yellow' size='large'>
-          未提交
+          {t('components.MjLogsTable.code.notSubmitted')}
         </Tag>
       );
     default:
       return (
         <Tag color='white' size='large'>
-          未知
+          {t('components.MjLogsTable.code.unknown')}
         </Tag>
       );
   }
 }
 
 function renderStatus(type) {
-  // Ensure all cases are string literals by adding quotes.
+  const { t } = useTranslation();
   switch (type) {
     case 'SUCCESS':
       return (
         <Tag color='green' size='large'>
-          成功
+          {t('components.MjLogsTable.status.success')}
         </Tag>
       );
     case 'NOT_START':
       return (
         <Tag color='grey' size='large'>
-          未启动
+          {t('components.MjLogsTable.status.notStarted')}
         </Tag>
       );
     case 'SUBMITTED':
       return (
         <Tag color='yellow' size='large'>
-          队列中
+          {t('components.MjLogsTable.status.queued')}
         </Tag>
       );
     case 'IN_PROGRESS':
       return (
         <Tag color='blue' size='large'>
-          执行中
+          {t('components.MjLogsTable.status.inProgress')}
         </Tag>
       );
     case 'FAILURE':
       return (
         <Tag color='red' size='large'>
-          失败
+          {t('components.MjLogsTable.status.failure')}
         </Tag>
       );
     case 'MODAL':
       return (
         <Tag color='yellow' size='large'>
-          窗口等待
+          {t('components.MjLogsTable.status.modalWait')}
         </Tag>
       );
     default:
       return (
         <Tag color='white' size='large'>
-          未知
+          {t('components.MjLogsTable.status.unknown')}
         </Tag>
       );
   }
@@ -236,10 +223,10 @@ const renderTimestamp = (timestampInSeconds) => {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // 格式化输出
 };
-// 修改renderDuration函数以包含颜色逻辑
+
 function renderDuration(submit_time, finishTime) {
   // 确保startTime和finishTime都是有效的时间戳
-  if (!submit_time || !finishTime) return 'N/A'; 
+  if (!submit_time || !finishTime) return 'N/A';
 
   // 将时间戳转换为Date对象
   const start = new Date(submit_time);
@@ -256,25 +243,27 @@ function renderDuration(submit_time, finishTime) {
 
   // 返回带有样式的颜色标签
   return (
-    <Tag color={color} size="large">
-      {durationSec} 秒
+    <Tag color={color} size='large'>
+      {durationSec} {t('components.MjLogsTable.seconds')}
     </Tag>
   );
 }
 
 const LogsTable = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
   const columns = [
     {
-      title: '提交时间',
+      title: t('components.MjLogsTable.columns.submitTime'),
       dataIndex: 'submit_time',
       render: (text, record, index) => {
         return <div>{renderTimestamp(text / 1000)}</div>;
       },
     },
     {
-      title: '花费时间',
+      title: t('components.MjLogsTable.columns.duration'),
       dataIndex: 'finish_time', // 以finish_time作为dataIndex
       key: 'finish_time',
       render: (finish, record) => {
@@ -283,7 +272,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '渠道',
+      title: t('components.MjLogsTable.columns.channel'),
       dataIndex: 'channel_id',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
@@ -304,21 +293,21 @@ const LogsTable = () => {
       },
     },
     {
-      title: '类型',
+      title: t('components.MjLogsTable.columns.type'),
       dataIndex: 'action',
       render: (text, record, index) => {
         return <div>{renderType(text)}</div>;
       },
     },
     {
-      title: '任务ID',
+      title: t('components.MjLogsTable.columns.taskId'),
       dataIndex: 'mj_id',
       render: (text, record, index) => {
         return <div>{text}</div>;
       },
     },
     {
-      title: '提交结果',
+      title: t('components.MjLogsTable.columns.submissionResult'),
       dataIndex: 'code',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
@@ -326,7 +315,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '任务状态',
+      title: t('components.MjLogsTable.columns.taskStatus'),
       dataIndex: 'status',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
@@ -334,7 +323,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '进度',
+      title: t('components.MjLogsTable.columns.progress'),
       dataIndex: 'progress',
       render: (text, record, index) => {
         return (
@@ -357,11 +346,11 @@ const LogsTable = () => {
       },
     },
     {
-      title: '结果图片',
+      title: t('components.MjLogsTable.columns.resultImage'),
       dataIndex: 'image_url',
       render: (text, record, index) => {
         if (!text) {
-          return '无';
+          return t('components.MjLogsTable.none');
         }
         return (
           <Button
@@ -370,18 +359,18 @@ const LogsTable = () => {
               setIsModalOpenurl(true); // 打开模态框
             }}
           >
-            查看图片
+            {t('components.MjLogsTable.viewImage')}
           </Button>
         );
       },
     },
     {
-      title: 'Prompt',
+      title: t('components.MjLogsTable.columns.prompt'),
       dataIndex: 'prompt',
       render: (text, record, index) => {
         // 如果text未定义，返回替代文本，例如空字符串''或其他
         if (!text) {
-          return '无';
+          return t('components.MjLogsTable.none');
         }
 
         return (
@@ -399,12 +388,12 @@ const LogsTable = () => {
       },
     },
     {
-      title: 'PromptEn',
+      title: t('components.MjLogsTable.columns.promptEn'),
       dataIndex: 'prompt_en',
       render: (text, record, index) => {
         // 如果text未定义，返回替代文本，例如空字符串''或其他
         if (!text) {
-          return '无';
+          return t('components.MjLogsTable.none');
         }
 
         return (
@@ -422,12 +411,12 @@ const LogsTable = () => {
       },
     },
     {
-      title: '失败原因',
+      title: t('components.MjLogsTable.columns.failReason'),
       dataIndex: 'fail_reason',
       render: (text, record, index) => {
         // 如果text未定义，返回替代文本，例如空字符串''或其他
         if (!text) {
-          return '无';
+          return t('components.MjLogsTable.none');
         }
 
         return (
@@ -481,10 +470,8 @@ const LogsTable = () => {
       logs[i].timestamp2string = timestamp2string(logs[i].created_at);
       logs[i].key = '' + logs[i].id;
     }
-    // data.key = '' + data.id
     setLogs(logs);
     setLogCount(logs.length + ITEMS_PER_PAGE);
-    // console.log(logCount);
   };
 
   const loadLogs = async (startIdx) => {
@@ -522,13 +509,11 @@ const LogsTable = () => {
   const handlePageChange = (page) => {
     setActivePage(page);
     if (page === Math.ceil(logs.length / ITEMS_PER_PAGE) + 1) {
-      // In this case we have to load more data and then append them.
       loadLogs(page - 1).then((r) => {});
     }
   };
 
   const refresh = async () => {
-    // setLoading(true);
     setActivePage(1);
     await loadLogs(0);
   };
@@ -537,7 +522,6 @@ const LogsTable = () => {
     if (await copy(text)) {
       showSuccess('已复制：' + text);
     } else {
-      // setSearchKeyword(text);
       Modal.error({ title: '无法复制到剪贴板，请手动复制', content: text });
     }
   };
@@ -559,7 +543,7 @@ const LogsTable = () => {
         {isAdminUser && showBanner ? (
           <Banner
             type='info'
-            description='当前未开启Midjourney回调，部分项目可能无法获得绘图结果，可在运营设置中开启。'
+            description={t('components.MjLogsTable.banner.description')}
           />
         ) : (
           <></>
@@ -568,25 +552,25 @@ const LogsTable = () => {
           <>
             <Form.Input
               field='channel_id'
-              label='渠道 ID'
+              label={t('components.MjLogsTable.form.channelId')}
               style={{ width: 176 }}
               value={channel_id}
-              placeholder={'可选值'}
+              placeholder={t('components.MjLogsTable.form.optionalValue')}
               name='channel_id'
               onChange={(value) => handleInputChange(value, 'channel_id')}
             />
             <Form.Input
               field='mj_id'
-              label='任务 ID'
+              label={t('components.MjLogsTable.form.taskId')}
               style={{ width: 176 }}
               value={mj_id}
-              placeholder='可选值'
+              placeholder={t('components.MjLogsTable.form.optionalValue')}
               name='mj_id'
               onChange={(value) => handleInputChange(value, 'mj_id')}
             />
             <Form.DatePicker
               field='start_timestamp'
-              label='起始时间'
+              label={t('components.MjLogsTable.form.startTime')}
               style={{ width: 272 }}
               initValue={start_timestamp}
               value={start_timestamp}
@@ -597,7 +581,7 @@ const LogsTable = () => {
             <Form.DatePicker
               field='end_timestamp'
               fluid
-              label='结束时间'
+              label={t('components.MjLogsTable.form.endTime')}
               style={{ width: 272 }}
               initValue={end_timestamp}
               value={end_timestamp}
@@ -608,13 +592,13 @@ const LogsTable = () => {
 
             <Form.Section>
               <Button
-                label='查询'
+                label={t('components.MjLogsTable.form.search')}
                 type='primary'
                 htmlType='submit'
                 className='btn-margin-right'
                 onClick={refresh}
               >
-                查询
+                {t('components.MjLogsTable.form.search')}
               </Button>
             </Form.Section>
           </>

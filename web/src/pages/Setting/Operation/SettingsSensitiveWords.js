@@ -3,12 +3,15 @@ import { Button, Col, Form, Row, Spin, Tag } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
-  showError,
+  useShowError,
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsSensitiveWords(props) {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     CheckSensitiveEnabled: false,
@@ -20,7 +23,10 @@ export default function SettingsSensitiveWords(props) {
 
   function onSubmit() {
     const updateArray = compareObjects(inputs, inputsRow);
-    if (!updateArray.length) return showWarning('你似乎并没有修改什么');
+    if (!updateArray.length)
+      return showWarning(
+        t('pages.Setting.Operation.SettingsSensitiveWords.noChanges'),
+      );
     const requestQueue = updateArray.map((item) => {
       let value = '';
       if (typeof inputs[item.key] === 'boolean') {
@@ -39,13 +45,22 @@ export default function SettingsSensitiveWords(props) {
         if (requestQueue.length === 1) {
           if (res.includes(undefined)) return;
         } else if (requestQueue.length > 1) {
-          if (res.includes(undefined)) return showError('部分保存失败，请重试');
+          if (res.includes(undefined))
+            return showError(
+              t(
+                'pages.Setting.Operation.SettingsSensitiveWords.partialSaveFailure',
+              ),
+            );
         }
-        showSuccess('保存成功');
+        showSuccess(
+          t('pages.Setting.Operation.SettingsSensitiveWords.saveSuccess'),
+        );
         props.refresh();
       })
       .catch(() => {
-        showError('保存失败，请重试');
+        showError(
+          t('pages.Setting.Operation.SettingsSensitiveWords.saveFailure'),
+        );
       })
       .finally(() => {
         setLoading(false);
@@ -63,6 +78,7 @@ export default function SettingsSensitiveWords(props) {
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
   }, [props.options]);
+
   return (
     <>
       <Spin spinning={loading}>
@@ -71,12 +87,18 @@ export default function SettingsSensitiveWords(props) {
           getFormApi={(formAPI) => (refForm.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'屏蔽词过滤设置'}>
+          <Form.Section
+            text={t(
+              'pages.Setting.Operation.SettingsSensitiveWords.sensitiveWordFilterSettings',
+            )}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Switch
                   field={'CheckSensitiveEnabled'}
-                  label={'启用屏蔽词过滤功能'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsSensitiveWords.enableSensitiveWordFilter',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -91,7 +113,9 @@ export default function SettingsSensitiveWords(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'CheckSensitiveOnPromptEnabled'}
-                  label={'启用 Prompt 检查'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsSensitiveWords.enablePromptCheck',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -107,9 +131,15 @@ export default function SettingsSensitiveWords(props) {
             <Row>
               <Col span={16}>
                 <Form.TextArea
-                  label={'屏蔽词列表'}
-                  extraText={'一行一个屏蔽词，不需要符号分割'}
-                  placeholder={'一行一个屏蔽词，不需要符号分割'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsSensitiveWords.sensitiveWordList',
+                  )}
+                  extraText={t(
+                    'pages.Setting.Operation.SettingsSensitiveWords.sensitiveWordListExtra',
+                  )}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsSensitiveWords.sensitiveWordListPlaceholder',
+                  )}
                   field={'SensitiveWords'}
                   onChange={(value) =>
                     setInputs({
@@ -124,7 +154,9 @@ export default function SettingsSensitiveWords(props) {
             </Row>
             <Row>
               <Button size='large' onClick={onSubmit}>
-                保存屏蔽词过滤设置
+                {t(
+                  'pages.Setting.Operation.SettingsSensitiveWords.saveSensitiveWordFilterSettings',
+                )}
               </Button>
             </Row>
           </Form.Section>

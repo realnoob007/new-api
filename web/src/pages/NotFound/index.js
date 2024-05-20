@@ -1,13 +1,18 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Message } from 'semantic-ui-react';
 
-const NotFound = () => (
-  <>
-    <Message negative>
-      <Message.Header>页面不存在</Message.Header>
-      <p>请检查你的浏览器地址是否正确</p>
-    </Message>
-  </>
-);
+const NotFound = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Message negative>
+        <Message.Header>{t('pages.NotFound.pageNotFound')}</Message.Header>
+        <p>{t('pages.NotFound.checkAddress')}</p>
+      </Message>
+    </>
+  );
+};
 
 export default NotFound;

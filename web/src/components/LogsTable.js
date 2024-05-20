@@ -3,7 +3,7 @@ import {
   API,
   copy,
   isAdmin,
-  showError,
+  useShowError,
   showSuccess,
   timestamp2string,
 } from '../helpers';
@@ -29,6 +29,7 @@ import {
   stringToColor,
 } from '../helpers/render';
 import Paragraph from '@douyinfe/semi-ui/lib/es/typography/paragraph';
+import { useTranslation } from 'react-i18next';
 
 const { Header } = Layout;
 
@@ -60,110 +61,100 @@ const colors = [
 ];
 
 function renderType(type) {
+  const { t } = useTranslation();
   switch (type) {
     case 1:
       return (
         <Tag color='cyan' size='large'>
-          {' '}
-          充值{' '}
+          {t('components.LogsTable.type.recharge')}
         </Tag>
       );
     case 2:
       return (
         <Tag color='lime' size='large'>
-          {' '}
-          消费{' '}
+          {t('components.LogsTable.type.consume')}
         </Tag>
       );
     case 3:
       return (
         <Tag color='orange' size='large'>
-          {' '}
-          管理{' '}
+          {t('components.LogsTable.type.manage')}
         </Tag>
       );
     case 4:
       return (
         <Tag color='purple' size='large'>
-          {' '}
-          系统{' '}
+          {t('components.LogsTable.type.system')}
         </Tag>
       );
     default:
       return (
         <Tag color='black' size='large'>
-          {' '}
-          未知{' '}
+          {t('components.LogsTable.type.unknown')}
         </Tag>
       );
   }
 }
 
 function renderIsStream(bool) {
+  const { t } = useTranslation();
   if (bool) {
     return (
       <Tag color='blue' size='large'>
-        流
+        {t('components.LogsTable.stream')}
       </Tag>
     );
   } else {
     return (
       <Tag color='purple' size='large'>
-        非流
+        {t('components.LogsTable.nonStream')}
       </Tag>
     );
   }
 }
 
 function renderUseTime(type) {
+  const { t } = useTranslation();
   const time = parseInt(type);
   if (time < 101) {
     return (
       <Tag color='green' size='large'>
-        {' '}
-        {time} s{' '}
+        {t('components.LogsTable.useTime', { time })}
       </Tag>
     );
   } else if (time < 300) {
     return (
       <Tag color='orange' size='large'>
-        {' '}
-        {time} s{' '}
+        {t('components.LogsTable.useTime', { time })}
       </Tag>
     );
   } else {
     return (
       <Tag color='red' size='large'>
-        {' '}
-        {time} s{' '}
+        {t('components.LogsTable.useTime', { time })}
       </Tag>
     );
   }
 }
 
 const LogsTable = () => {
+  const { t } = useTranslation();
   const columns = [
     {
-      title: '时间',
+      title: t('components.LogsTable.columns.time'),
       dataIndex: 'timestamp2string',
     },
     {
-      title: '渠道',
+      title: t('components.LogsTable.columns.channel'),
       dataIndex: 'channel',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
         return isAdminUser ? (
           record.type === 0 || record.type === 2 ? (
             <div>
-              {
-                <Tag
-                  color={colors[parseInt(text) % colors.length]}
-                  size='large'
-                >
-                  {' '}
-                  {text}{' '}
-                </Tag>
-              }
+              <Tag color={colors[parseInt(text) % colors.length]} size='large'>
+                {text}
+              </Tag>
             </div>
           ) : (
             <></>
@@ -174,7 +165,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '用户',
+      title: t('components.LogsTable.columns.user'),
       dataIndex: 'username',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
@@ -196,7 +187,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '令牌',
+      title: t('components.LogsTable.columns.token'),
       dataIndex: 'token_name',
       render: (text, record, index) => {
         return record.type === 0 || record.type === 2 ? (
@@ -208,8 +199,7 @@ const LogsTable = () => {
                 copyText(text);
               }}
             >
-              {' '}
-              {text}{' '}
+              {text}
             </Tag>
           </div>
         ) : (
@@ -218,14 +208,14 @@ const LogsTable = () => {
       },
     },
     {
-      title: '类型',
+      title: t('components.LogsTable.columns.type'),
       dataIndex: 'type',
       render: (text, record, index) => {
         return <div>{renderType(text)}</div>;
       },
     },
     {
-      title: '模型',
+      title: t('components.LogsTable.columns.model'),
       dataIndex: 'model_name',
       render: (text, record, index) => {
         return record.type === 0 || record.type === 2 ? (
@@ -237,8 +227,7 @@ const LogsTable = () => {
                 copyText(text);
               }}
             >
-              {' '}
-              {text}{' '}
+              {text}
             </Tag>
           </div>
         ) : (
@@ -247,7 +236,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '用时',
+      title: t('components.LogsTable.columns.useTime'),
       dataIndex: 'use_time',
       render: (text, record, index) => {
         return (
@@ -261,7 +250,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '提示',
+      title: t('components.LogsTable.columns.promptTokens'),
       dataIndex: 'prompt_tokens',
       render: (text, record, index) => {
         return record.type === 0 || record.type === 2 ? (
@@ -272,7 +261,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '补全',
+      title: t('components.LogsTable.columns.completionTokens'),
       dataIndex: 'completion_tokens',
       render: (text, record, index) => {
         return parseInt(text) > 0 &&
@@ -284,7 +273,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '花费',
+      title: t('components.LogsTable.columns.cost'),
       dataIndex: 'quota',
       render: (text, record, index) => {
         return record.type === 0 || record.type === 2 ? (
@@ -295,11 +284,12 @@ const LogsTable = () => {
       },
     },
     {
-      title: '重试',
+      title: t('components.LogsTable.columns.retry'),
       dataIndex: 'retry',
       className: isAdmin() ? 'tableShow' : 'tableHiddle',
       render: (text, record, index) => {
-        let content = '渠道：' + record.channel;
+        let content =
+          t('components.LogsTable.columns.channel') + '：' + record.channel;
         if (record.other !== '') {
           let other = JSON.parse(record.other);
           if (other.admin_info !== undefined) {
@@ -311,7 +301,7 @@ const LogsTable = () => {
               // channel id array
               let useChannel = other.admin_info.use_channel;
               let useChannelStr = useChannel.join('->');
-              content = `渠道：${useChannelStr}`;
+              content = `${t('components.LogsTable.columns.channel')}：${useChannelStr}`;
             }
           }
         }
@@ -319,7 +309,7 @@ const LogsTable = () => {
       },
     },
     {
-      title: '详情',
+      title: t('components.LogsTable.columns.details'),
       dataIndex: 'content',
       render: (text, record, index) => {
         if (record.other === '') {
@@ -362,7 +352,7 @@ const LogsTable = () => {
       },
     },
   ];
-
+  const showError = useShowError();
   const [logs, setLogs] = useState([]);
   const [showStat, setShowStat] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -449,13 +439,24 @@ const LogsTable = () => {
     const { success, message, data } = res.data;
     if (success) {
       Modal.info({
-        title: '用户信息',
+        title: t('components.LogsTable.userInfo.title'),
         content: (
           <div style={{ padding: 12 }}>
-            <p>用户名: {data.username}</p>
-            <p>余额: {renderQuota(data.quota)}</p>
-            <p>已用额度：{renderQuota(data.used_quota)}</p>
-            <p>请求次数：{renderNumber(data.request_count)}</p>
+            <p>
+              {t('components.LogsTable.userInfo.username')}: {data.username}
+            </p>
+            <p>
+              {t('components.LogsTable.userInfo.quota')}:{' '}
+              {renderQuota(data.quota)}
+            </p>
+            <p>
+              {t('components.LogsTable.userInfo.usedQuota')}:{' '}
+              {renderQuota(data.used_quota)}
+            </p>
+            <p>
+              {t('components.LogsTable.userInfo.requestCount')}:{' '}
+              {renderNumber(data.request_count)}
+            </p>
           </div>
         ),
         centered: true,
@@ -535,10 +536,13 @@ const LogsTable = () => {
 
   const copyText = async (text) => {
     if (await copy(text)) {
-      showSuccess('已复制：' + text);
+      showSuccess(t('components.LogsTable.copied', { text }));
     } else {
       // setSearchKeyword(text);
-      Modal.error({ title: '无法复制到剪贴板，请手动复制', content: text });
+      Modal.error({
+        title: t('components.LogsTable.copyError.title'),
+        content: text,
+      });
     }
   };
 
@@ -579,17 +583,11 @@ const LogsTable = () => {
         <Header>
           <Spin spinning={loadingStat}>
             <h3>
-              使用明细（总消耗额度：
-              <span
-                onClick={handleEyeClick}
-                style={{
-                  cursor: 'pointer',
-                  color: 'gray',
-                }}
-              >
-                {showStat ? renderQuota(stat.quota) : '点击查看'}
-              </span>
-              ）
+              {t('components.LogsTable.header', {
+                quota: showStat
+                  ? renderQuota(stat.quota)
+                  : t('components.LogsTable.clickToView'),
+              })}
             </h3>
           </Spin>
         </Header>
@@ -597,25 +595,25 @@ const LogsTable = () => {
           <>
             <Form.Input
               field='token_name'
-              label='令牌名称'
+              label={t('components.LogsTable.form.tokenName')}
               style={{ width: 176 }}
               value={token_name}
-              placeholder={'可选值'}
+              placeholder={t('components.LogsTable.form.optional')}
               name='token_name'
               onChange={(value) => handleInputChange(value, 'token_name')}
             />
             <Form.Input
               field='model_name'
-              label='模型名称'
+              label={t('components.LogsTable.form.modelName')}
               style={{ width: 176 }}
               value={model_name}
-              placeholder='可选值'
+              placeholder={t('components.LogsTable.form.optional')}
               name='model_name'
               onChange={(value) => handleInputChange(value, 'model_name')}
             />
             <Form.DatePicker
               field='start_timestamp'
-              label='起始时间'
+              label={t('components.LogsTable.form.startTime')}
               style={{ width: 272 }}
               initValue={start_timestamp}
               value={start_timestamp}
@@ -626,7 +624,7 @@ const LogsTable = () => {
             <Form.DatePicker
               field='end_timestamp'
               fluid
-              label='结束时间'
+              label={t('components.LogsTable.form.endTime')}
               style={{ width: 272 }}
               initValue={end_timestamp}
               value={end_timestamp}
@@ -638,19 +636,19 @@ const LogsTable = () => {
               <>
                 <Form.Input
                   field='channel'
-                  label='渠道 ID'
+                  label={t('components.LogsTable.form.channelId')}
                   style={{ width: 176 }}
                   value={channel}
-                  placeholder='可选值'
+                  placeholder={t('components.LogsTable.form.optional')}
                   name='channel'
                   onChange={(value) => handleInputChange(value, 'channel')}
                 />
                 <Form.Input
                   field='username'
-                  label='用户名称'
+                  label={t('components.LogsTable.form.username')}
                   style={{ width: 176 }}
                   value={username}
-                  placeholder={'可选值'}
+                  placeholder={t('components.LogsTable.form.optional')}
                   name='username'
                   onChange={(value) => handleInputChange(value, 'username')}
                 />
@@ -658,14 +656,14 @@ const LogsTable = () => {
             )}
             <Form.Section>
               <Button
-                label='查询'
+                label={t('components.LogsTable.form.query')}
                 type='primary'
                 htmlType='submit'
                 className='btn-margin-right'
                 onClick={refresh}
                 loading={loading}
               >
-                查询
+                {t('components.LogsTable.form.query')}
               </Button>
             </Form.Section>
           </>
@@ -694,11 +692,21 @@ const LogsTable = () => {
             loadLogs(0, pageSize, parseInt(value));
           }}
         >
-          <Select.Option value='0'>全部</Select.Option>
-          <Select.Option value='1'>充值</Select.Option>
-          <Select.Option value='2'>消费</Select.Option>
-          <Select.Option value='3'>管理</Select.Option>
-          <Select.Option value='4'>系统</Select.Option>
+          <Select.Option value='0'>
+            {t('components.LogsTable.logType.all')}
+          </Select.Option>
+          <Select.Option value='1'>
+            {t('components.LogsTable.logType.recharge')}
+          </Select.Option>
+          <Select.Option value='2'>
+            {t('components.LogsTable.logType.consume')}
+          </Select.Option>
+          <Select.Option value='3'>
+            {t('components.LogsTable.logType.manage')}
+          </Select.Option>
+          <Select.Option value='4'>
+            {t('components.LogsTable.logType.system')}
+          </Select.Option>
         </Select>
       </Layout>
     </>

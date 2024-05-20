@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { API, showError } from '../../helpers';
+import { useTranslation } from 'react-i18next';
+import { API, useShowError } from '../../helpers';
 import { marked } from 'marked';
 import { Layout } from '@douyinfe/semi-ui';
 
 const About = () => {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [about, setAbout] = useState('');
   const [aboutLoaded, setAboutLoaded] = useState(false);
 
@@ -20,7 +23,7 @@ const About = () => {
       localStorage.setItem('about', aboutContent);
     } else {
       showError(message);
-      setAbout('加载关于内容失败...');
+      setAbout(t('pages.About.loadError'));
     }
     setAboutLoaded(true);
   };
@@ -35,18 +38,15 @@ const About = () => {
         <>
           <Layout>
             <Layout.Header>
-              <h3>关于</h3>
+              <h3>{t('pages.About.title')}</h3>
             </Layout.Header>
             <Layout.Content>
-              <p>可在设置页面设置关于内容，支持 HTML & Markdown</p>
-              new-api项目仓库地址：
+              <p>{t('pages.About.description')}</p>
+              {t('pages.About.repository')}：
               <a href='https://github.com/Calcium-Ion/new-api'>
                 https://github.com/Calcium-Ion/new-api
               </a>
-              <p>
-                NewAPI © 2023 CalciumIon | 基于 One API v0.5.4 © 2023
-                JustSong。本项目根据MIT许可证授权。
-              </p>
+              <p>{t('pages.About.footer')}</p>
             </Layout.Content>
           </Layout>
         </>

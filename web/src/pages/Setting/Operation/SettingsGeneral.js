@@ -3,12 +3,15 @@ import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
-  showError,
+  useShowError,
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
 
 export default function GeneralSettings(props) {
+  const showError = useShowError();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
     TopUpLink: '',
@@ -22,13 +25,18 @@ export default function GeneralSettings(props) {
   });
   const refForm = useRef();
   const [inputsRow, setInputsRow] = useState(inputs);
+
   function onChange(value, e) {
     const name = e.target.id;
     setInputs((inputs) => ({ ...inputs, [name]: value }));
   }
+
   function onSubmit() {
     const updateArray = compareObjects(inputs, inputsRow);
-    if (!updateArray.length) return showWarning('你似乎并没有修改什么');
+    if (!updateArray.length)
+      return showWarning(
+        t('pages.Setting.Operation.SettingsGeneral.noChanges'),
+      );
     const requestQueue = updateArray.map((item) => {
       let value = '';
       if (typeof inputs[item.key] === 'boolean') {
@@ -47,13 +55,16 @@ export default function GeneralSettings(props) {
         if (requestQueue.length === 1) {
           if (res.includes(undefined)) return;
         } else if (requestQueue.length > 1) {
-          if (res.includes(undefined)) return showError('部分保存失败，请重试');
+          if (res.includes(undefined))
+            return showError(
+              t('pages.Setting.Operation.SettingsGeneral.partialSaveFailure'),
+            );
         }
-        showSuccess('保存成功');
+        showSuccess(t('pages.Setting.Operation.SettingsGeneral.saveSuccess'));
         props.refresh();
       })
       .catch(() => {
-        showError('保存失败，请重试');
+        showError(t('pages.Setting.Operation.SettingsGeneral.saveFailure'));
       })
       .finally(() => {
         setLoading(false);
@@ -79,14 +90,18 @@ export default function GeneralSettings(props) {
           getFormApi={(formAPI) => (refForm.current = formAPI)}
           style={{ marginBottom: 15 }}
         >
-          <Form.Section text={'通用设置'}>
+          <Form.Section
+            text={t('pages.Setting.Operation.SettingsGeneral.generalSettings')}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Input
                   field={'TopUpLink'}
-                  label={'充值链接'}
+                  label={t('pages.Setting.Operation.SettingsGeneral.topUpLink')}
                   initValue={''}
-                  placeholder={'例如发卡网站的购买链接'}
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsGeneral.topUpLinkPlaceholder',
+                  )}
                   onChange={onChange}
                   showClear
                 />
@@ -94,9 +109,13 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Input
                   field={'ChatLink'}
-                  label={'默认聊天页面链接'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.defaultChatLink',
+                  )}
                   initValue={''}
-                  placeholder='例如 ChatGPT Next Web 的部署地址'
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsGeneral.defaultChatLinkPlaceholder',
+                  )}
                   onChange={onChange}
                   showClear
                 />
@@ -104,9 +123,11 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Input
                   field={'ChatLink2'}
-                  label={'聊天页面 2 链接'}
+                  label={t('pages.Setting.Operation.SettingsGeneral.chatLink2')}
                   initValue={''}
-                  placeholder='例如 ChatGPT Next Web 的部署地址'
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsGeneral.chatLink2Placeholder',
+                  )}
                   onChange={onChange}
                   showClear
                 />
@@ -114,9 +135,13 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Input
                   field={'QuotaPerUnit'}
-                  label={'单位美元额度'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.quotaPerUnit',
+                  )}
                   initValue={''}
-                  placeholder='一单位货币能兑换的额度'
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsGeneral.quotaPerUnitPlaceholder',
+                  )}
                   onChange={onChange}
                   showClear
                 />
@@ -124,9 +149,13 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Input
                   field={'RetryTimes'}
-                  label={'失败重试次数'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.retryTimes',
+                  )}
                   initValue={''}
-                  placeholder='失败重试次数'
+                  placeholder={t(
+                    'pages.Setting.Operation.SettingsGeneral.retryTimesPlaceholder',
+                  )}
                   onChange={onChange}
                   showClear
                 />
@@ -136,7 +165,9 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'DisplayInCurrencyEnabled'}
-                  label={'以货币形式显示额度'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.displayInCurrency',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -151,7 +182,9 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'DisplayTokenStatEnabled'}
-                  label={'Billing 相关 API 显示令牌额度而非用户额度'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.displayTokenStat',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -166,7 +199,9 @@ export default function GeneralSettings(props) {
               <Col span={8}>
                 <Form.Switch
                   field={'DefaultCollapseSidebar'}
-                  label={'默认折叠侧边栏'}
+                  label={t(
+                    'pages.Setting.Operation.SettingsGeneral.defaultCollapseSidebar',
+                  )}
                   size='large'
                   checkedText='｜'
                   uncheckedText='〇'
@@ -181,7 +216,9 @@ export default function GeneralSettings(props) {
             </Row>
             <Row>
               <Button size='large' onClick={onSubmit}>
-                保存通用设置
+                {t(
+                  'pages.Setting.Operation.SettingsGeneral.saveGeneralSettings',
+                )}
               </Button>
             </Row>
           </Form.Section>
