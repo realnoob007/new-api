@@ -1,0 +1,17 @@
+{
+    "invalid_parameter": "无效的参数",
+    "connection_failed": "无法连接至 GitHub 服务器，请稍后重试！",
+    "state_invalid": "state 为空或不相同",
+    "no_token_provided": "未提供令牌",
+    "token_exhausted": "该令牌额度已用尽 [sk-%s***%s]",
+    "token_expired": "该令牌已过期",
+    "token_not_enabled": "该令牌状态不可用",
+    "id_or_userid_empty": "ID 或 UserID 为空",
+    "invalid_token": "无效的令牌",
+    "quota_negative": "Quota 不能为负数",
+    "token_insufficient_quota": "令牌额度不足",
+    "user_insufficient_quota": "用户额度不足，剩余额度为 %d",
+    "token_already_bound": "该 GitHub 账户已被绑定",
+    "quota_reminder": "您的额度即将用尽",
+    "quota_exhausted": "您的额度已用尽"
+}
