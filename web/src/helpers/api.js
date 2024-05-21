@@ -1,4 +1,3 @@
-import { showError } from './utils';
 import axios from 'axios';
 
 export const API = axios.create({
@@ -12,10 +11,3 @@ API.interceptors.request.use((config) => {
     localStorage.getItem('i18nextLng') || 'zh';
   return config;
 });
-
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    showError(error);
-  },
-);
