@@ -1018,5 +1018,8 @@
         "internalServerError": "Error: Internal server error. Please contact the administrator!",
         "demoSite": "This site is for demonstration purposes only and has no backend services!",
         "default": "Error: {{message}}"
+    },
+    "helpers":{
+        "equalAmount": "Equivalent amount"
     }
 }

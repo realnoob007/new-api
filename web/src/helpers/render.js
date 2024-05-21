@@ -1,4 +1,5 @@
 import { Tag } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
 
 export function renderText(text, limit) {
   if (text.length > limit) {
@@ -174,8 +175,9 @@ export function renderModelPrice(
 export function renderQuotaWithPrompt(quota, digits) {
   let displayInCurrency = localStorage.getItem('display_in_currency');
   displayInCurrency = displayInCurrency === 'true';
+  const { t } = useTranslation();
   if (displayInCurrency) {
-    return `（等价金额：${renderQuota(quota, digits)}）`;
+    return `（${t('helpers.equalAmount')}：${renderQuota(quota, digits)}）`;
   }
   return '';
 }

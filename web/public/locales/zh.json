@@ -1018,5 +1018,8 @@
         "internalServerError": "错误：服务器内部错误，请联系管理员！",
         "demoSite": "本站仅作演示之用，无服务端！",
         "default": "错误：{{message}}"
+    },
+    "helpers":{
+        "equalAmount": "等价金额"
     }
 }
