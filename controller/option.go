@@ -2,12 +2,21 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrGitHubOAuthDisabled            = errors.New("github_oauth_disabled")
+	ErrEmailDomainRestrictionDisabled = errors.New("email_domain_restriction_disabled")
+	ErrWeChatAuthDisabled             = errors.New("wechat_auth_disabled")
+	ErrTurnstileCheckDisabled         = errors.New("turnstile_check_disabled")
 )
 
 func GetOptions(c *gin.Context) {
@@ -37,7 +46,7 @@ func UpdateOption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -46,7 +55,7 @@ func UpdateOption(c *gin.Context) {
 		if option.Value == "true" && common.GitHubClientId == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法启用 GitHub OAuth，请先填入 GitHub Client Id 以及 GitHub Client Secret！",
+				"message": i18n.GetErrorMessage(ErrGitHubOAuthDisabled.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -54,7 +63,7 @@ func UpdateOption(c *gin.Context) {
 		if option.Value == "true" && len(common.EmailDomainWhitelist) == 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法启用邮箱域名限制，请先填入限制的邮箱域名！",
+				"message": i18n.GetErrorMessage(ErrEmailDomainRestrictionDisabled.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -62,7 +71,7 @@ func UpdateOption(c *gin.Context) {
 		if option.Value == "true" && common.WeChatServerAddress == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法启用微信登录，请先填入微信登录相关配置信息！",
+				"message": i18n.GetErrorMessage(ErrWeChatAuthDisabled.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -70,7 +79,7 @@ func UpdateOption(c *gin.Context) {
 		if option.Value == "true" && common.TurnstileSiteKey == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法启用 Turnstile 校验，请先填入 Turnstile 校验相关配置信息！",
+				"message": i18n.GetErrorMessage(ErrTurnstileCheckDisabled.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -79,7 +88,7 @@ func UpdateOption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

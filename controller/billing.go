@@ -1,10 +1,12 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"one-api/common"
 	"one-api/dto"
+	"one-api/i18n"
 	"one-api/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetSubscription(c *gin.Context) {
@@ -29,7 +31,7 @@ func GetSubscription(c *gin.Context) {
 	}
 	if err != nil {
 		openAIError := dto.OpenAIError{
-			Message: err.Error(),
+			Message: i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			Type:    "upstream_error",
 		}
 		c.JSON(200, gin.H{
@@ -71,7 +73,7 @@ func GetUsage(c *gin.Context) {
 	}
 	if err != nil {
 		openAIError := dto.OpenAIError{
-			Message: err.Error(),
+			Message: i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			Type:    "new_api_error",
 		}
 		c.JSON(200, gin.H{

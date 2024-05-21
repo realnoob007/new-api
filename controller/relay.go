@@ -3,12 +3,12 @@ package controller
 import (
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log"
 	"net/http"
 	"one-api/common"
 	"one-api/dto"
+	"one-api/i18n" // 引入 i18n 包
 	"one-api/middleware"
 	"one-api/model"
 	"one-api/relay"
@@ -16,6 +16,8 @@ import (
 	relayconstant "one-api/relay/constant"
 	"one-api/service"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func relayHandler(c *gin.Context, relayMode int) *dto.OpenAIErrorWithStatusCode {
@@ -77,11 +79,11 @@ func Relay(c *gin.Context) {
 
 	if openaiErr != nil {
 		if openaiErr.StatusCode == http.StatusTooManyRequests {
-			openaiErr.Error.Message = "当前分组上游负载已饱和，请稍后再试"
+			openaiErr.Error.Message = "group_overloaded"
 		}
 		openaiErr.Error.Message = common.MessageWithRequestId(openaiErr.Error.Message, requestId)
 		c.JSON(openaiErr.StatusCode, gin.H{
-			"error": openaiErr.Error,
+			"error": i18n.GetErrorMessage(openaiErr.Error.Message, i18n.GetPreferredLanguage(c)),
 		})
 	}
 }
@@ -154,28 +156,28 @@ func RelayMidjourney(c *gin.Context) {
 	if err != nil {
 		statusCode := http.StatusBadRequest
 		if err.Code == 30 {
-			err.Result = "当前分组负载已饱和，请稍后再试，或升级账户以提升服务质量。"
+			err.Result = "group_overloaded_upgrade"
 			statusCode = http.StatusTooManyRequests
 		}
 		c.JSON(statusCode, gin.H{
-			"description": fmt.Sprintf("%s %s", err.Description, err.Result),
+			"description": fmt.Sprintf("%s %s", err.Description, i18n.GetErrorMessage(err.Result, i18n.GetPreferredLanguage(c))),
 			"type":        "upstream_error",
 			"code":        err.Code,
 		})
 		channelId := c.GetInt("channel_id")
-		common.LogError(c, fmt.Sprintf("relay error (channel #%d, status code %d): %s", channelId, statusCode, fmt.Sprintf("%s %s", err.Description, err.Result)))
+		common.LogError(c, fmt.Sprintf("relay error (channel #%d, status code %d): %s", channelId, statusCode, fmt.Sprintf("%s %s", err.Description, i18n.GetErrorMessage(err.Result, i18n.GetPreferredLanguage(c)))))
 	}
 }
 
 func RelayNotImplemented(c *gin.Context) {
 	err := dto.OpenAIError{
-		Message: "API not implemented",
+		Message: "api_not_implemented",
 		Type:    "new_api_error",
 		Param:   "",
 		Code:    "api_not_implemented",
 	}
 	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": err,
+		"error": i18n.GetErrorMessage(err.Message, i18n.GetPreferredLanguage(c)),
 	})
 }
 
@@ -187,6 +189,6 @@ func RelayNotFound(c *gin.Context) {
 		Code:    "",
 	}
 	c.JSON(http.StatusNotFound, gin.H{
-		"error": err,
+		"error": i18n.GetErrorMessage(err.Message, i18n.GetPreferredLanguage(c)),
 	})
 }

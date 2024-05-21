@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strconv"
 	"sync"
@@ -21,7 +22,7 @@ type LoginRequest struct {
 func Login(c *gin.Context) {
 	if !common.PasswordLoginEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "管理员关闭了密码登录",
+			"message": i18n.GetErrorMessage("password_login_disabled", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -30,7 +31,7 @@ func Login(c *gin.Context) {
 	err := json.NewDecoder(c.Request.Body).Decode(&loginRequest)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -39,7 +40,7 @@ func Login(c *gin.Context) {
 	password := loginRequest.Password
 	if username == "" || password == "" {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -51,7 +52,7 @@ func Login(c *gin.Context) {
 	err = user.ValidateAndFill()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -69,7 +70,7 @@ func setupLogin(user *model.User, c *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "无法保存会话信息，请重试",
+			"message": i18n.GetErrorMessage("session_save_failed", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -95,7 +96,7 @@ func Logout(c *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -109,14 +110,14 @@ func Logout(c *gin.Context) {
 func Register(c *gin.Context) {
 	if !common.RegisterEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "管理员关闭了新用户注册",
+			"message": i18n.GetErrorMessage("registration_disabled", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
 	}
 	if !common.PasswordRegisterEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "管理员关闭了通过密码进行注册，请使用第三方账户验证的形式进行注册",
+			"message": i18n.GetErrorMessage("password_registration_disabled", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -126,14 +127,14 @@ func Register(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if err := common.Validate.Struct(&user); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "输入不合法 " + err.Error(),
+			"message": i18n.GetErrorMessage("invalid_input", i18n.GetPreferredLanguage(c)) + " " + err.Error(),
 		})
 		return
 	}
@@ -141,14 +142,14 @@ func Register(c *gin.Context) {
 		if user.Email == "" || user.VerificationCode == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员开启了邮箱验证，请输入邮箱地址和验证码",
+				"message": i18n.GetErrorMessage("email_verification_required", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
 		if !common.VerifyCodeWithKey(user.Email, user.VerificationCode, common.EmailVerificationPurpose) {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "验证码错误或已过期",
+				"message": i18n.GetErrorMessage("invalid_or_expired_code", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -157,14 +158,14 @@ func Register(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if exist {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "用户名已存在，或已注销",
+			"message": i18n.GetErrorMessage("username_exists_or_deleted", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -182,7 +183,7 @@ func Register(c *gin.Context) {
 	if err := cleanUser.Insert(inviterId); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -190,7 +191,6 @@ func Register(c *gin.Context) {
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 func GetAllUsers(c *gin.Context) {
@@ -202,7 +202,7 @@ func GetAllUsers(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -211,7 +211,6 @@ func GetAllUsers(c *gin.Context) {
 		"message": "",
 		"data":    users,
 	})
-	return
 }
 
 func SearchUsers(c *gin.Context) {
@@ -221,7 +220,7 @@ func SearchUsers(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -230,7 +229,6 @@ func SearchUsers(c *gin.Context) {
 		"message": "",
 		"data":    users,
 	})
-	return
 }
 
 func GetUser(c *gin.Context) {
@@ -238,7 +236,7 @@ func GetUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -246,7 +244,7 @@ func GetUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -254,7 +252,7 @@ func GetUser(c *gin.Context) {
 	if myRole <= user.Role && myRole != common.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权获取同级或更高等级用户的信息",
+			"message": i18n.GetErrorMessage("no_permission_for_user_info", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -263,7 +261,6 @@ func GetUser(c *gin.Context) {
 		"message": "",
 		"data":    user,
 	})
-	return
 }
 
 func GenerateAccessToken(c *gin.Context) {
@@ -272,7 +269,7 @@ func GenerateAccessToken(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -281,7 +278,7 @@ func GenerateAccessToken(c *gin.Context) {
 	if model.DB.Where("access_token = ?", user.AccessToken).First(user).RowsAffected != 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "请重试，系统生成的 UUID 竟然重复了！",
+			"message": i18n.GetErrorMessage("uuid_duplicate", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -289,7 +286,7 @@ func GenerateAccessToken(c *gin.Context) {
 	if err := user.Update(false); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -299,7 +296,6 @@ func GenerateAccessToken(c *gin.Context) {
 		"message": "",
 		"data":    user.AccessToken,
 	})
-	return
 }
 
 type TransferAffQuotaRequest struct {
@@ -312,7 +308,7 @@ func TransferAffQuota(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -320,7 +316,7 @@ func TransferAffQuota(c *gin.Context) {
 	if err := c.ShouldBindJSON(&tran); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -328,13 +324,13 @@ func TransferAffQuota(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "划转失败 " + err.Error(),
+			"message": i18n.GetErrorMessage("quota_transfer_failed", i18n.GetPreferredLanguage(c)) + " " + err.Error(),
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "划转成功",
+		"message": i18n.GetErrorMessage("quota_transfer_success", i18n.GetPreferredLanguage(c)),
 	})
 }
 
@@ -344,7 +340,7 @@ func GetAffCode(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -353,7 +349,7 @@ func GetAffCode(c *gin.Context) {
 		if err := user.Update(false); err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": err.Error(),
+				"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -363,7 +359,6 @@ func GetAffCode(c *gin.Context) {
 		"message": "",
 		"data":    user.AffCode,
 	})
-	return
 }
 
 func GetSelf(c *gin.Context) {
@@ -372,7 +367,7 @@ func GetSelf(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -381,7 +376,6 @@ func GetSelf(c *gin.Context) {
 		"message": "",
 		"data":    user,
 	})
-	return
 }
 
 func GetUserModels(c *gin.Context) {
@@ -393,7 +387,7 @@ func GetUserModels(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -403,7 +397,6 @@ func GetUserModels(c *gin.Context) {
 		"message": "",
 		"data":    models,
 	})
-	return
 }
 
 func UpdateUser(c *gin.Context) {
@@ -412,7 +405,7 @@ func UpdateUser(c *gin.Context) {
 	if err != nil || updatedUser.Id == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -422,7 +415,7 @@ func UpdateUser(c *gin.Context) {
 	if err := common.Validate.Struct(&updatedUser); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "输入不合法 " + err.Error(),
+			"message": i18n.GetErrorMessage("invalid_input", i18n.GetPreferredLanguage(c)) + " " + err.Error(),
 		})
 		return
 	}
@@ -430,7 +423,7 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -438,14 +431,14 @@ func UpdateUser(c *gin.Context) {
 	if myRole <= originUser.Role && myRole != common.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权更新同权限等级或更高权限等级的用户信息",
+			"message": i18n.GetErrorMessage("no_permission_to_update_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if myRole <= updatedUser.Role && myRole != common.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权将其他用户权限等级提升到大于等于自己的权限等级",
+			"message": i18n.GetErrorMessage("no_permission_to_promote_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -456,18 +449,17 @@ func UpdateUser(c *gin.Context) {
 	if err := updatedUser.Edit(updatePassword); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if originUser.Quota != updatedUser.Quota {
-		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)))
+		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf(i18n.GetErrorMessage("quota_update_log", i18n.GetPreferredLanguage(c)), common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)))
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 func UpdateSelf(c *gin.Context) {
@@ -476,7 +468,7 @@ func UpdateSelf(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -486,7 +478,7 @@ func UpdateSelf(c *gin.Context) {
 	if err := common.Validate.Struct(&user); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "输入不合法 " + err.Error(),
+			"message": i18n.GetErrorMessage("invalid_input", i18n.GetPreferredLanguage(c)) + " " + err.Error(),
 		})
 		return
 	}
@@ -505,7 +497,7 @@ func UpdateSelf(c *gin.Context) {
 	if err := cleanUser.Update(updatePassword); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -514,7 +506,6 @@ func UpdateSelf(c *gin.Context) {
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 func DeleteUser(c *gin.Context) {
@@ -522,7 +513,7 @@ func DeleteUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -530,7 +521,7 @@ func DeleteUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -538,7 +529,7 @@ func DeleteUser(c *gin.Context) {
 	if myRole <= originUser.Role {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权删除同权限等级或更高权限等级的用户",
+			"message": i18n.GetErrorMessage("no_permission_to_delete_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -546,9 +537,8 @@ func DeleteUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
-			"message": "",
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
-		return
 	}
 }
 
@@ -559,7 +549,7 @@ func DeleteSelf(c *gin.Context) {
 	if user.Role == common.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "不能删除超级管理员账户",
+			"message": i18n.GetErrorMessage("cannot_delete_root_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -568,7 +558,7 @@ func DeleteSelf(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -576,7 +566,6 @@ func DeleteSelf(c *gin.Context) {
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 func CreateUser(c *gin.Context) {
@@ -585,14 +574,14 @@ func CreateUser(c *gin.Context) {
 	if err != nil || user.Username == "" || user.Password == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if err := common.Validate.Struct(&user); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "输入不合法 " + err.Error(),
+			"message": i18n.GetErrorMessage("invalid_input", i18n.GetPreferredLanguage(c)) + " " + err.Error(),
 		})
 		return
 	}
@@ -603,7 +592,7 @@ func CreateUser(c *gin.Context) {
 	if user.Role >= myRole {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无法创建权限大于等于自己的用户",
+			"message": i18n.GetErrorMessage("no_permission_to_create_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -616,7 +605,7 @@ func CreateUser(c *gin.Context) {
 	if err := cleanUser.Insert(0); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -625,7 +614,6 @@ func CreateUser(c *gin.Context) {
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 type ManageRequest struct {
@@ -641,7 +629,7 @@ func ManageUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -653,7 +641,7 @@ func ManageUser(c *gin.Context) {
 	if user.Id == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "用户不存在",
+			"message": i18n.GetErrorMessage("user_not_found", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -661,7 +649,7 @@ func ManageUser(c *gin.Context) {
 	if myRole <= user.Role && myRole != common.RoleRootUser {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权更新同权限等级或更高权限等级的用户信息",
+			"message": i18n.GetErrorMessage("no_permission_to_manage_user", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -671,7 +659,7 @@ func ManageUser(c *gin.Context) {
 		if user.Role == common.RoleRootUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法禁用超级管理员用户",
+				"message": i18n.GetErrorMessage("cannot_disable_root_user", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -681,14 +669,14 @@ func ManageUser(c *gin.Context) {
 		if user.Role == common.RoleRootUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法删除超级管理员用户",
+				"message": i18n.GetErrorMessage("cannot_delete_root_user", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
 		if err := user.Delete(); err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": err.Error(),
+				"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -696,14 +684,14 @@ func ManageUser(c *gin.Context) {
 		if myRole != common.RoleRootUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "普通管理员用户无法提升其他用户为管理员",
+				"message": i18n.GetErrorMessage("cannot_promote_user", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
 		if user.Role >= common.RoleAdminUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "该用户已经是管理员",
+				"message": i18n.GetErrorMessage("user_already_admin", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -712,14 +700,14 @@ func ManageUser(c *gin.Context) {
 		if user.Role == common.RoleRootUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无法降级超级管理员用户",
+				"message": i18n.GetErrorMessage("cannot_demote_root_user", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
 		if user.Role == common.RoleCommonUser {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "该用户已经是普通用户",
+				"message": i18n.GetErrorMessage("user_already_common", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -729,7 +717,7 @@ func ManageUser(c *gin.Context) {
 	if err := user.Update(false); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -742,7 +730,6 @@ func ManageUser(c *gin.Context) {
 		"message": "",
 		"data":    clearUser,
 	})
-	return
 }
 
 func EmailBind(c *gin.Context) {
@@ -751,7 +738,7 @@ func EmailBind(c *gin.Context) {
 	if !common.VerifyCodeWithKey(email, code, common.EmailVerificationPurpose) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "验证码错误或已过期",
+			"message": i18n.GetErrorMessage("invalid_or_expired_code", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -763,7 +750,7 @@ func EmailBind(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -773,7 +760,7 @@ func EmailBind(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -784,7 +771,6 @@ func EmailBind(c *gin.Context) {
 		"success": true,
 		"message": "",
 	})
-	return
 }
 
 type topUpRequest struct {
@@ -801,7 +787,7 @@ func TopUp(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -810,7 +796,7 @@ func TopUp(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -819,5 +805,4 @@ func TopUp(c *gin.Context) {
 		"message": "",
 		"data":    quota,
 	})
-	return
 }

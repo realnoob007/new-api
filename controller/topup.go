@@ -1,15 +1,18 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
+	"one-api/constant"
+
 	"github.com/Calcium-Ion/go-epay/epay"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
-	"one-api/constant"
 
 	"log"
 	"net/url"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"one-api/service"
 	"strconv"
@@ -27,6 +30,16 @@ type AmountRequest struct {
 	Amount    int    `json:"amount"`
 	TopUpCode string `json:"top_up_code"`
 }
+
+// Error messages
+var (
+	ErrInvalidParams            = errors.New("invalid_params")
+	ErrAmountTooLow             = errors.New("amount_too_low")
+	ErrAmountTooLowToRecharge   = errors.New("amount_too_low_to_recharge")
+	ErrPaymentInfoNotConfigured = errors.New("payment_info_not_configured")
+	ErrPaymentFailed            = errors.New("payment_failed")
+	ErrOrderCreationFailed      = errors.New("order_creation_failed")
+)
 
 func GetEpayClient() *epay.Client {
 	if constant.PayAddress == "" || constant.EpayId == "" || constant.EpayKey == "" {
@@ -46,7 +59,6 @@ func getPayMoney(amount float64, user model.User) float64 {
 	if !common.DisplayInCurrencyEnabled {
 		amount = amount / common.QuotaPerUnit
 	}
-	// 别问为什么用float64，问就是这么点钱没必要
 	topupGroupRatio := common.GetTopupGroupRatio(user.Group)
 	if topupGroupRatio == 0 {
 		topupGroupRatio = 1
@@ -67,11 +79,11 @@ func RequestEpay(c *gin.Context) {
 	var req EpayRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(200, gin.H{"message": "error", "data": "参数错误"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrInvalidParams.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 	if req.Amount < getMinTopup() {
-		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getMinTopup())})
+		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf(i18n.GetErrorMessage(ErrAmountTooLowToRecharge.Error(), i18n.GetPreferredLanguage(c)), getMinTopup())})
 		return
 	}
 
@@ -79,7 +91,7 @@ func RequestEpay(c *gin.Context) {
 	user, _ := model.GetUserById(id, false)
 	payMoney := getPayMoney(float64(req.Amount), *user)
 	if payMoney < 0.01 {
-		c.JSON(200, gin.H{"message": "error", "data": "充值金额过低"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrAmountTooLow.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 
@@ -97,7 +109,7 @@ func RequestEpay(c *gin.Context) {
 	tradeNo := fmt.Sprintf("%s%d", common.GetRandomString(6), time.Now().Unix())
 	client := GetEpayClient()
 	if client == nil {
-		c.JSON(200, gin.H{"message": "error", "data": "当前管理员未配置支付信息"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrPaymentInfoNotConfigured.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 	uri, params, err := client.Purchase(&epay.PurchaseArgs{
@@ -110,7 +122,7 @@ func RequestEpay(c *gin.Context) {
 		ReturnUrl:      returnUrl,
 	})
 	if err != nil {
-		c.JSON(200, gin.H{"message": "error", "data": "拉起支付失败"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrPaymentFailed.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 	amount := req.Amount
@@ -127,17 +139,15 @@ func RequestEpay(c *gin.Context) {
 	}
 	err = topUp.Insert()
 	if err != nil {
-		c.JSON(200, gin.H{"message": "error", "data": "创建订单失败"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrOrderCreationFailed.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 	c.JSON(200, gin.H{"message": "success", "data": params, "url": uri})
 }
 
-// tradeNo lock
 var orderLocks sync.Map
 var createLock sync.Mutex
 
-// LockOrder 尝试对给定订单号加锁
 func LockOrder(tradeNo string) {
 	lock, ok := orderLocks.Load(tradeNo)
 	if !ok {
@@ -152,7 +162,6 @@ func LockOrder(tradeNo string) {
 	lock.(*sync.Mutex).Lock()
 }
 
-// UnlockOrder 释放给定订单号的锁
 func UnlockOrder(tradeNo string) {
 	lock, ok := orderLocks.Load(tradeNo)
 	if ok {
@@ -205,8 +214,6 @@ func EpayNotify(c *gin.Context) {
 				log.Printf("易支付回调更新订单失败: %v", topUp)
 				return
 			}
-			//user, _ := model.GetUserById(topUp.UserId, false)
-			//user.Quota += topUp.Amount * 500000
 			err = model.IncreaseUserQuota(topUp.UserId, topUp.Amount*int(common.QuotaPerUnit))
 			if err != nil {
 				log.Printf("易支付回调更新用户失败: %v", topUp)
@@ -224,19 +231,19 @@ func RequestAmount(c *gin.Context) {
 	var req AmountRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(200, gin.H{"message": "error", "data": "参数错误"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrInvalidParams.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 
 	if req.Amount < getMinTopup() {
-		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getMinTopup())})
+		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf(i18n.GetErrorMessage(ErrAmountTooLowToRecharge.Error(), i18n.GetPreferredLanguage(c)), getMinTopup())})
 		return
 	}
 	id := c.GetInt("id")
 	user, _ := model.GetUserById(id, false)
 	payMoney := getPayMoney(float64(req.Amount), *user)
 	if payMoney <= 0.01 {
-		c.JSON(200, gin.H{"message": "error", "data": "充值金额过低"})
+		c.JSON(200, gin.H{"message": "error", "data": i18n.GetErrorMessage(ErrAmountTooLow.Error(), i18n.GetPreferredLanguage(c))})
 		return
 	}
 	c.JSON(200, gin.H{"message": "success", "data": strconv.FormatFloat(payMoney, 'f', 2, 64)})

@@ -1,12 +1,14 @@
 package middleware
 
 import (
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strings"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 func authHelper(c *gin.Context, minRole int) {
@@ -21,7 +23,7 @@ func authHelper(c *gin.Context, minRole int) {
 		if accessToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"success": false,
-				"message": "无权进行此操作，未登录且未提供 access token",
+				"message": i18n.GetErrorMessage("no_permission_not_logged_in_no_access_token", i18n.GetPreferredLanguage(c)),
 			})
 			c.Abort()
 			return
@@ -36,7 +38,7 @@ func authHelper(c *gin.Context, minRole int) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "无权进行此操作，access token 无效",
+				"message": i18n.GetErrorMessage("no_permission_invalid_access_token", i18n.GetPreferredLanguage(c)),
 			})
 			c.Abort()
 			return
@@ -45,7 +47,7 @@ func authHelper(c *gin.Context, minRole int) {
 	if status.(int) == common.UserStatusDisabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "用户已被封禁",
+			"message": i18n.GetErrorMessage("user_banned", i18n.GetPreferredLanguage(c)),
 		})
 		c.Abort()
 		return
@@ -53,7 +55,7 @@ func authHelper(c *gin.Context, minRole int) {
 	if role.(int) < minRole {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无权进行此操作，权限不足",
+			"message": i18n.GetErrorMessage("no_permission_insufficient_privileges", i18n.GetPreferredLanguage(c)),
 		})
 		c.Abort()
 		return
@@ -120,7 +122,7 @@ func TokenAuth() func(c *gin.Context) {
 			return
 		}
 		if !userEnabled {
-			abortWithOpenAiMessage(c, http.StatusForbidden, "用户已被封禁")
+			abortWithOpenAiMessage(c, http.StatusForbidden, i18n.GetErrorMessage("user_banned", i18n.GetPreferredLanguage(c)))
 			return
 		}
 		c.Set("id", token.UserId)
@@ -140,7 +142,7 @@ func TokenAuth() func(c *gin.Context) {
 			if model.IsAdmin(token.UserId) {
 				c.Set("specific_channel_id", parts[1])
 			} else {
-				abortWithOpenAiMessage(c, http.StatusForbidden, "普通用户不支持指定渠道")
+				abortWithOpenAiMessage(c, http.StatusForbidden, i18n.GetErrorMessage("normal_user_cannot_specify_channel", i18n.GetPreferredLanguage(c)))
 				return
 			}
 		}

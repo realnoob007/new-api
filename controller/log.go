@@ -1,11 +1,18 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"errors"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrTargetTimestampRequired = errors.New("target_timestamp_required")
 )
 
 func GetAllLogs(c *gin.Context) {
@@ -28,7 +35,7 @@ func GetAllLogs(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -62,7 +69,7 @@ func GetUserLogs(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -80,7 +87,7 @@ func SearchAllLogs(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -99,7 +106,7 @@ func SearchUserLogs(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -117,7 +124,7 @@ func GetLogByKey(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -176,9 +183,10 @@ func GetLogsSelfStat(c *gin.Context) {
 func DeleteHistoryLogs(c *gin.Context) {
 	targetTimestamp, _ := strconv.ParseInt(c.Query("target_timestamp"), 10, 64)
 	if targetTimestamp == 0 {
+		err := ErrTargetTimestampRequired
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "target timestamp is required",
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -186,7 +194,7 @@ func DeleteHistoryLogs(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

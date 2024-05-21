@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"io"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"sort"
 
@@ -16,7 +17,7 @@ import (
 func TelegramBind(c *gin.Context) {
 	if !common.TelegramOAuthEnabled {
 		c.JSON(200, gin.H{
-			"message": "管理员未开启通过 Telegram 登录以及注册",
+			"message": i18n.GetErrorMessage("telegram_oauth_disabled", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -24,7 +25,7 @@ func TelegramBind(c *gin.Context) {
 	params := c.Request.URL.Query()
 	if !checkTelegramAuthorization(params, common.TelegramBotToken) {
 		c.JSON(200, gin.H{
-			"message": "无效的请求",
+			"message": i18n.GetErrorMessage("invalid_request", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -32,7 +33,7 @@ func TelegramBind(c *gin.Context) {
 	telegramId := params["id"][0]
 	if model.IsTelegramIdAlreadyTaken(telegramId) {
 		c.JSON(200, gin.H{
-			"message": "该 Telegram 账户已被绑定",
+			"message": i18n.GetErrorMessage("telegram_id_taken", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -43,7 +44,7 @@ func TelegramBind(c *gin.Context) {
 	user := model.User{Id: id.(int)}
 	if err := user.FillUserById(); err != nil {
 		c.JSON(200, gin.H{
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -51,7 +52,7 @@ func TelegramBind(c *gin.Context) {
 	user.TelegramId = telegramId
 	if err := user.Update(false); err != nil {
 		c.JSON(200, gin.H{
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -63,7 +64,7 @@ func TelegramBind(c *gin.Context) {
 func TelegramLogin(c *gin.Context) {
 	if !common.TelegramOAuthEnabled {
 		c.JSON(200, gin.H{
-			"message": "管理员未开启通过 Telegram 登录以及注册",
+			"message": i18n.GetErrorMessage("telegram_oauth_disabled", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -71,7 +72,7 @@ func TelegramLogin(c *gin.Context) {
 	params := c.Request.URL.Query()
 	if !checkTelegramAuthorization(params, common.TelegramBotToken) {
 		c.JSON(200, gin.H{
-			"message": "无效的请求",
+			"message": i18n.GetErrorMessage("invalid_request", i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -81,7 +82,7 @@ func TelegramLogin(c *gin.Context) {
 	user := model.User{TelegramId: telegramId}
 	if err := user.FillUserByTelegramId(); err != nil {
 		c.JSON(200, gin.H{
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return

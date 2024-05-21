@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/constant"
+	"one-api/i18n"
 	"one-api/model"
 	"strings"
 
@@ -17,7 +18,7 @@ func TestStatus(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"success": false,
-			"message": "数据库连接失败",
+			"message": i18n.GetErrorMessage("database_connection_failed", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -116,7 +117,7 @@ func SendEmailVerification(c *gin.Context) {
 	if err := common.Validate.Var(email, "required,email"); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_parameter", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -124,7 +125,7 @@ func SendEmailVerification(c *gin.Context) {
 	if len(parts) != 2 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的邮箱地址",
+			"message": i18n.GetErrorMessage("invalid_email_address", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -141,7 +142,7 @@ func SendEmailVerification(c *gin.Context) {
 		if !allowed {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "The administrator has enabled the email domain name whitelist, and your email address is not allowed due to special symbols or it's not in the whitelist.",
+				"message": i18n.GetErrorMessage("email_domain_not_allowed", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -151,7 +152,7 @@ func SendEmailVerification(c *gin.Context) {
 		if containsSpecialSymbols {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员已启用邮箱地址别名限制，您的邮箱地址由于包含特殊符号而被拒绝。",
+				"message": i18n.GetErrorMessage("email_alias_restriction", i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -160,7 +161,7 @@ func SendEmailVerification(c *gin.Context) {
 	if model.IsEmailAlreadyTaken(email) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "邮箱地址已被占用",
+			"message": i18n.GetErrorMessage("email_already_taken", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -190,14 +191,14 @@ func SendPasswordResetEmail(c *gin.Context) {
 	if err := common.Validate.Var(email, "required,email"); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_parameter", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if !model.IsEmailAlreadyTaken(email) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该邮箱地址未注册",
+			"message": i18n.GetErrorMessage("email_not_registered", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -235,14 +236,14 @@ func ResetPassword(c *gin.Context) {
 	if req.Email == "" || req.Token == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无效的参数",
+			"message": i18n.GetErrorMessage("invalid_parameter", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if !common.VerifyCodeWithKey(req.Email, req.Token, common.PasswordResetPurpose) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "重置链接非法或已过期",
+			"message": i18n.GetErrorMessage("invalid_or_expired_reset_link", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

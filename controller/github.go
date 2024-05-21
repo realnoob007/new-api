@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strconv"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 type GitHubOAuthResponse struct {
@@ -26,9 +28,18 @@ type GitHubUser struct {
 	Email string `json:"email"`
 }
 
+var (
+	ErrUnableToConnectToGitHub        = errors.New("unable_to_connect_to_github")
+	ErrInvalidResponseUserFieldEmpty  = errors.New("invalid_response_user_field_empty")
+	ErrAdminDisabledGitHubLogin       = errors.New("admin_disabled_github_login")
+	ErrAdminClosedNewUserRegistration = errors.New("admin_closed_new_user_registration")
+	ErrUserBanned                     = errors.New("user_banned")
+	ErrGitHubAccountAlreadyBound      = errors.New("github_account_already_bound")
+)
+
 func getGitHubUserInfoByCode(code string) (*GitHubUser, error) {
 	if code == "" {
-		return nil, errors.New("无效的参数")
+		return nil, errors.New("invalid_params")
 	}
 	values := map[string]string{"client_id": common.GitHubClientId, "client_secret": common.GitHubClientSecret, "code": code}
 	jsonData, err := json.Marshal(values)
@@ -47,7 +58,7 @@ func getGitHubUserInfoByCode(code string) (*GitHubUser, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		return nil, errors.New("无法连接至 GitHub 服务器，请稍后重试！")
+		return nil, ErrUnableToConnectToGitHub
 	}
 	defer res.Body.Close()
 	var oAuthResponse GitHubOAuthResponse
@@ -63,7 +74,7 @@ func getGitHubUserInfoByCode(code string) (*GitHubUser, error) {
 	res2, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		return nil, errors.New("无法连接至 GitHub 服务器，请稍后重试！")
+		return nil, ErrUnableToConnectToGitHub
 	}
 	defer res2.Body.Close()
 	var githubUser GitHubUser
@@ -72,7 +83,7 @@ func getGitHubUserInfoByCode(code string) (*GitHubUser, error) {
 		return nil, err
 	}
 	if githubUser.Login == "" {
-		return nil, errors.New("返回值非法，用户字段为空，请稍后重试！")
+		return nil, ErrInvalidResponseUserFieldEmpty
 	}
 	return &githubUser, nil
 }
@@ -96,7 +107,7 @@ func GitHubOAuth(c *gin.Context) {
 	if !common.GitHubOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 GitHub 登录以及注册",
+			"message": i18n.GetErrorMessage(ErrAdminDisabledGitHubLogin.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -105,7 +116,7 @@ func GitHubOAuth(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -117,7 +128,7 @@ func GitHubOAuth(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": err.Error(),
+				"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -136,14 +147,14 @@ func GitHubOAuth(c *gin.Context) {
 			if err := user.Insert(0); err != nil {
 				c.JSON(http.StatusOK, gin.H{
 					"success": false,
-					"message": err.Error(),
+					"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 				})
 				return
 			}
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员关闭了新用户注册",
+				"message": i18n.GetErrorMessage(ErrAdminClosedNewUserRegistration.Error(), i18n.GetPreferredLanguage(c)),
 			})
 			return
 		}
@@ -151,7 +162,7 @@ func GitHubOAuth(c *gin.Context) {
 
 	if user.Status != common.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "用户已被封禁",
+			"message": i18n.GetErrorMessage(ErrUserBanned.Error(), i18n.GetPreferredLanguage(c)),
 			"success": false,
 		})
 		return
@@ -163,7 +174,7 @@ func GitHubBind(c *gin.Context) {
 	if !common.GitHubOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 GitHub 登录以及注册",
+			"message": i18n.GetErrorMessage(ErrAdminDisabledGitHubLogin.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -172,7 +183,7 @@ func GitHubBind(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -182,7 +193,7 @@ func GitHubBind(c *gin.Context) {
 	if model.IsGitHubIdAlreadyTaken(user.GitHubId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该 GitHub 账户已被绑定",
+			"message": i18n.GetErrorMessage(ErrGitHubAccountAlreadyBound.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -194,7 +205,7 @@ func GitHubBind(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -203,7 +214,7 @@ func GitHubBind(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -222,7 +233,7 @@ func GenerateOAuthCode(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

@@ -3,8 +3,18 @@ package model
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"one-api/common"
+
+	"gorm.io/gorm"
+)
+
+var (
+	ErrIdEmpty            = errors.New("id_empty")
+	ErrRedemptionKeyEmpty = errors.New("redemption_key_empty")
+	ErrInvalidUserId      = errors.New("invalid_user_id")
+	ErrInvalidRedemption  = errors.New("invalid_redemption")
+	ErrRedemptionUsed     = errors.New("redemption_used")
+	ErrRedemptionFailed   = errors.New("redemption_failed")
 )
 
 type Redemption struct {
@@ -35,7 +45,7 @@ func SearchRedemptions(keyword string) (redemptions []*Redemption, err error) {
 
 func GetRedemptionById(id int) (*Redemption, error) {
 	if id == 0 {
-		return nil, errors.New("id 为空！")
+		return nil, ErrIdEmpty
 	}
 	redemption := Redemption{Id: id}
 	var err error = nil
@@ -45,10 +55,10 @@ func GetRedemptionById(id int) (*Redemption, error) {
 
 func Redeem(key string, userId int) (quota int, err error) {
 	if key == "" {
-		return 0, errors.New("未提供兑换码")
+		return 0, ErrRedemptionKeyEmpty
 	}
 	if userId == 0 {
-		return 0, errors.New("无效的 user id")
+		return 0, ErrInvalidUserId
 	}
 	redemption := &Redemption{}
 
@@ -60,10 +70,10 @@ func Redeem(key string, userId int) (quota int, err error) {
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		err := tx.Set("gorm:query_option", "FOR UPDATE").Where(keyCol+" = ?", key).First(redemption).Error
 		if err != nil {
-			return errors.New("无效的兑换码")
+			return ErrInvalidRedemption
 		}
 		if redemption.Status != common.RedemptionCodeStatusEnabled {
-			return errors.New("该兑换码已被使用")
+			return ErrRedemptionUsed
 		}
 		err = tx.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
 		if err != nil {
@@ -76,7 +86,7 @@ func Redeem(key string, userId int) (quota int, err error) {
 		return err
 	})
 	if err != nil {
-		return 0, errors.New("兑换失败，" + err.Error())
+		return 0, fmt.Errorf("%w, %v", ErrRedemptionFailed, err)
 	}
 	RecordLog(userId, LogTypeTopup, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)))
 	return redemption.Quota, nil
@@ -108,7 +118,7 @@ func (redemption *Redemption) Delete() error {
 
 func DeleteRedemptionById(id int) (err error) {
 	if id == 0 {
-		return errors.New("id 为空！")
+		return ErrIdEmpty
 	}
 	redemption := Redemption{Id: id}
 	err = DB.Where(redemption).First(&redemption).Error

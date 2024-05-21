@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetAllChannels(c *gin.Context) {
@@ -23,7 +25,7 @@ func GetAllChannels(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -40,7 +42,7 @@ func FixChannelsAbilities(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -55,12 +57,11 @@ func SearchChannels(c *gin.Context) {
 	keyword := c.Query("keyword")
 	group := c.Query("group")
 	modelKeyword := c.Query("model")
-	//idSort, _ := strconv.ParseBool(c.Query("id_sort"))
 	channels, err := model.SearchChannels(keyword, group, modelKeyword)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -77,7 +78,7 @@ func GetChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -85,7 +86,7 @@ func GetChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -103,7 +104,7 @@ func AddChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -122,7 +123,7 @@ func AddChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -140,7 +141,7 @@ func DeleteChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -156,7 +157,7 @@ func DeleteDisabledChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -178,7 +179,7 @@ func DeleteChannelBatch(c *gin.Context) {
 	if err != nil || len(channelBatch.Ids) == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "参数错误",
+			"message": i18n.GetErrorMessage("invalid_params", i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -186,7 +187,7 @@ func DeleteChannelBatch(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -204,7 +205,7 @@ func UpdateChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -212,7 +213,7 @@ func UpdateChannel(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

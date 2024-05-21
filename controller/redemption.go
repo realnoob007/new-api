@@ -1,11 +1,21 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"errors"
 	"net/http"
 	"one-api/common"
+	"one-api/i18n"
 	"one-api/model"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrRedemptionNameLength  = errors.New("redemption_name_length_error")
+	ErrRedemptionCountZero   = errors.New("redemption_count_zero_error")
+	ErrRedemptionCountExceed = errors.New("redemption_count_exceed_error")
+	ErrInvalidID             = errors.New("invalid_id_error")
 )
 
 func GetAllRedemptions(c *gin.Context) {
@@ -17,7 +27,7 @@ func GetAllRedemptions(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -35,7 +45,7 @@ func SearchRedemptions(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -52,7 +62,7 @@ func GetRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(ErrInvalidID.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -60,7 +70,7 @@ func GetRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -78,28 +88,28 @@ func AddRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if len(redemption.Name) == 0 || len(redemption.Name) > 20 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "兑换码名称长度必须在1-20之间",
+			"message": i18n.GetErrorMessage(ErrRedemptionNameLength.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if redemption.Count <= 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "兑换码个数必须大于0",
+			"message": i18n.GetErrorMessage(ErrRedemptionCountZero.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
 	if redemption.Count > 100 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "一次兑换码批量生成的个数不能大于 100",
+			"message": i18n.GetErrorMessage(ErrRedemptionCountExceed.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -117,7 +127,7 @@ func AddRedemption(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": err.Error(),
+				"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 				"data":    keys,
 			})
 			return
@@ -138,7 +148,7 @@ func DeleteRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -156,7 +166,7 @@ func UpdateRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -164,7 +174,7 @@ func UpdateRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}
@@ -179,7 +189,7 @@ func UpdateRedemption(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": err.Error(),
+			"message": i18n.GetErrorMessage(err.Error(), i18n.GetPreferredLanguage(c)),
 		})
 		return
 	}

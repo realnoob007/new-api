@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"one-api/i18n"
+
 	"gorm.io/gorm"
 )
 
@@ -38,12 +40,25 @@ type User struct {
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
 }
 
+// Error variables
+var (
+	ErrIDEmpty                 = errors.New("id_empty")
+	ErrAffCodeEmpty            = errors.New("aff_code_empty")
+	ErrUsernameOrPasswordEmpty = errors.New("username_or_password_empty")
+	ErrUsernameOrPasswordError = errors.New("username_or_password_error_or_user_banned")
+	ErrGitHubIDEmpty           = errors.New("github_id_empty")
+	ErrWeChatIDEmpty           = errors.New("wechat_id_empty")
+	ErrTelegramIDEmpty         = errors.New("telegram_id_empty")
+	ErrTelegramAccountNotBound = errors.New("telegram_account_not_bound")
+	ErrQuotaCannotBeNegative   = errors.New("quota_cannot_be_negative")
+	ErrInsufficientAffQuota    = errors.New("insufficient_aff_quota")
+	ErrEmailOrPasswordEmpty    = errors.New("email_or_password_empty")
+)
+
 // CheckUserExistOrDeleted check if user exist or deleted, if not exist, return false, nil, if deleted or exist, return true, nil
 func CheckUserExistOrDeleted(username string, email string) (bool, error) {
 	var user User
 
-	// err := DB.Unscoped().First(&user, "username = ? or email = ?", username, email).Error
-	// check email if empty
 	var err error
 	if email == "" {
 		err = DB.Unscoped().First(&user, "username = ?", username).Error
@@ -52,13 +67,10 @@ func CheckUserExistOrDeleted(username string, email string) (bool, error) {
 	}
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// not exist, return false, nil
 			return false, nil
 		}
-		// other error, return false, err
 		return false, err
 	}
-	// exist, return true, nil
 	return true, nil
 }
 
@@ -77,13 +89,11 @@ func SearchUsers(keyword string, group string) ([]*User, error) {
 	var users []*User
 	var err error
 
-	// 尝试将关键字转换为整数ID
 	keywordInt, err := strconv.Atoi(keyword)
 	if err == nil {
-		// 如果转换成功，按照ID和可选的组别搜索用户
 		query := DB.Unscoped().Omit("password").Where("`id` = ?", keywordInt)
 		if group != "" {
-			query = query.Where("`group` = ?", group) // 使用反引号包围group
+			query = query.Where("`group` = ?", group)
 		}
 		err = query.Find(&users).Error
 		if err != nil || len(users) > 0 {
@@ -107,7 +117,7 @@ func SearchUsers(keyword string, group string) ([]*User, error) {
 
 func GetUserById(id int, selectAll bool) (*User, error) {
 	if id == 0 {
-		return nil, errors.New("id 为空！")
+		return nil, ErrIDEmpty
 	}
 	user := User{Id: id}
 	var err error = nil
@@ -121,7 +131,7 @@ func GetUserById(id int, selectAll bool) (*User, error) {
 
 func GetUserIdByAffCode(affCode string) (int, error) {
 	if affCode == "" {
-		return 0, errors.New("affCode 为空！")
+		return 0, ErrAffCodeEmpty
 	}
 	var user User
 	err := DB.Select("id").First(&user, "aff_code = ?", affCode).Error
@@ -130,7 +140,7 @@ func GetUserIdByAffCode(affCode string) (int, error) {
 
 func DeleteUserById(id int) (err error) {
 	if id == 0 {
-		return errors.New("id 为空！")
+		return ErrIDEmpty
 	}
 	user := User{Id: id}
 	return user.Delete()
@@ -138,7 +148,7 @@ func DeleteUserById(id int) (err error) {
 
 func HardDeleteUserById(id int) error {
 	if id == 0 {
-		return errors.New("id 为空！")
+		return ErrIDEmpty
 	}
 	err := DB.Unscoped().Delete(&User{}, "id = ?", id).Error
 	return err
@@ -156,39 +166,32 @@ func inviteUser(inviterId int) (err error) {
 }
 
 func (user *User) TransferAffQuotaToQuota(quota int) error {
-	// 检查quota是否小于最小额度
 	if float64(quota) < common.QuotaPerUnit {
-		return fmt.Errorf("转移额度最小为%s！", common.LogQuota(int(common.QuotaPerUnit)))
+		return fmt.Errorf(i18n.GetErrorMessage("transfer_minimum_quota", "zh"), common.LogQuota(int(common.QuotaPerUnit)))
 	}
 
-	// 开始数据库事务
 	tx := DB.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
-	defer tx.Rollback() // 确保在函数退出时事务能回滚
+	defer tx.Rollback()
 
-	// 加锁查询用户以确保数据一致性
 	err := tx.Set("gorm:query_option", "FOR UPDATE").First(&user, user.Id).Error
 	if err != nil {
 		return err
 	}
 
-	// 再次检查用户的AffQuota是否足够
 	if user.AffQuota < quota {
-		return errors.New("邀请额度不足！")
+		return ErrInsufficientAffQuota
 	}
 
-	// 更新用户额度
 	user.AffQuota -= quota
 	user.Quota += quota
 
-	// 保存用户状态
 	if err := tx.Save(user).Error; err != nil {
 		return err
 	}
 
-	// 提交事务
 	return tx.Commit().Error
 }
 
@@ -216,7 +219,6 @@ func (user *User) Insert(inviterId int) error {
 			RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("使用邀请码赠送 %s", common.LogQuota(common.QuotaForInvitee)))
 		}
 		if common.QuotaForInviter > 0 {
-			//_ = IncreaseUserQuota(inviterId, common.QuotaForInviter)
 			RecordLog(inviterId, LogTypeSystem, fmt.Sprintf("邀请用户赠送 %s", common.LogQuota(common.QuotaForInviter)))
 			_ = inviteUser(inviterId)
 		}
@@ -275,7 +277,7 @@ func (user *User) Edit(updatePassword bool) error {
 
 func (user *User) Delete() error {
 	if user.Id == 0 {
-		return errors.New("id 为空！")
+		return ErrIDEmpty
 	}
 	err := DB.Delete(user).Error
 	return err
@@ -283,7 +285,7 @@ func (user *User) Delete() error {
 
 func (user *User) HardDelete() error {
 	if user.Id == 0 {
-		return errors.New("id 为空！")
+		return ErrIDEmpty
 	}
 	err := DB.Unscoped().Delete(user).Error
 	return err
@@ -291,24 +293,21 @@ func (user *User) HardDelete() error {
 
 // ValidateAndFill check password & user status
 func (user *User) ValidateAndFill() (err error) {
-	// When querying with struct, GORM will only query with non-zero fields,
-	// that means if your field’s value is 0, '', false or other zero values,
-	// it won’t be used to build query conditions
 	password := user.Password
 	if user.Username == "" || password == "" {
-		return errors.New("用户名或密码为空")
+		return ErrUsernameOrPasswordEmpty
 	}
 	DB.Where(User{Username: user.Username}).First(user)
 	okay := common.ValidatePasswordAndHash(password, user.Password)
 	if !okay || user.Status != common.UserStatusEnabled {
-		return errors.New("用户名或密码错误，或用户已被封禁")
+		return ErrUsernameOrPasswordError
 	}
 	return nil
 }
 
 func (user *User) FillUserById() error {
 	if user.Id == 0 {
-		return errors.New("id 为空！")
+		return ErrIDEmpty
 	}
 	DB.Where(User{Id: user.Id}).First(user)
 	return nil
@@ -316,7 +315,7 @@ func (user *User) FillUserById() error {
 
 func (user *User) FillUserByEmail() error {
 	if user.Email == "" {
-		return errors.New("email 为空！")
+		return ErrEmailOrPasswordEmpty
 	}
 	DB.Where(User{Email: user.Email}).First(user)
 	return nil
@@ -324,7 +323,7 @@ func (user *User) FillUserByEmail() error {
 
 func (user *User) FillUserByGitHubId() error {
 	if user.GitHubId == "" {
-		return errors.New("GitHub id 为空！")
+		return ErrGitHubIDEmpty
 	}
 	DB.Where(User{GitHubId: user.GitHubId}).First(user)
 	return nil
@@ -332,7 +331,7 @@ func (user *User) FillUserByGitHubId() error {
 
 func (user *User) FillUserByWeChatId() error {
 	if user.WeChatId == "" {
-		return errors.New("WeChat id 为空！")
+		return ErrWeChatIDEmpty
 	}
 	DB.Where(User{WeChatId: user.WeChatId}).First(user)
 	return nil
@@ -340,7 +339,7 @@ func (user *User) FillUserByWeChatId() error {
 
 func (user *User) FillUserByUsername() error {
 	if user.Username == "" {
-		return errors.New("username 为空！")
+		return ErrUsernameOrPasswordEmpty
 	}
 	DB.Where(User{Username: user.Username}).First(user)
 	return nil
@@ -348,11 +347,11 @@ func (user *User) FillUserByUsername() error {
 
 func (user *User) FillUserByTelegramId() error {
 	if user.TelegramId == "" {
-		return errors.New("Telegram id 为空！")
+		return ErrTelegramIDEmpty
 	}
 	err := DB.Where(User{TelegramId: user.TelegramId}).First(user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("该 Telegram 账户未绑定")
+		return ErrTelegramAccountNotBound
 	}
 	return nil
 }
@@ -379,7 +378,7 @@ func IsTelegramIdAlreadyTaken(telegramId string) bool {
 
 func ResetUserPasswordByEmail(email string, password string) error {
 	if email == "" || password == "" {
-		return errors.New("邮箱地址或密码为空！")
+		return ErrEmailOrPasswordEmpty
 	}
 	hashedPassword, err := common.Password2Hash(password)
 	if err != nil {
@@ -458,7 +457,7 @@ func GetUserGroup(id int) (group string, err error) {
 
 func IncreaseUserQuota(id int, quota int) (err error) {
 	if quota < 0 {
-		return errors.New("quota 不能为负数！")
+		return ErrQuotaCannotBeNegative
 	}
 	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUserQuota, id, quota)
@@ -474,7 +473,7 @@ func increaseUserQuota(id int, quota int) (err error) {
 
 func DecreaseUserQuota(id int, quota int) (err error) {
 	if quota < 0 {
-		return errors.New("quota 不能为负数！")
+		return ErrQuotaCannotBeNegative
 	}
 	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUserQuota, id, -quota)
