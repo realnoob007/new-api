@@ -379,6 +379,7 @@
             "turnstileCheck": "请稍后几秒重试，Turnstile 正在检查用户环境！",
             "verificationCodeSent": "验证码发送成功，请检查邮箱！",
             "enterVerificationCode": "请输入邮箱验证码！",
+            "emailBindSuccess": "邮箱绑定成功",
             "copied": "已复制：",
             "copyErrorTitle": "无法复制到剪贴板，请手动复制",
             "enterTransferAmount": "请输入要划转的数量",

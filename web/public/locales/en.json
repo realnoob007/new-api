@@ -379,6 +379,7 @@
             "turnstileCheck": "Please try again in a few seconds, Turnstile is checking the user environment!",
             "verificationCodeSent": "Verification code sent successfully, please check your email!",
             "enterVerificationCode": "Please enter the email verification code!",
+            "emailBindSuccess": "Email Bind Success",
             "copied": "Copied: ",
             "copyErrorTitle": "Unable to copy to clipboard, please copy manually",
             "enterTransferAmount": "Please enter the amount to transfer",
@@ -1019,7 +1020,7 @@
         "demoSite": "This site is for demonstration purposes only and has no backend services!",
         "default": "Error: {{message}}"
     },
-    "helpers":{
+    "helpers": {
         "equalAmount": "Equivalent amount"
     }
 }
