@@ -86,7 +86,7 @@ func Redeem(key string, userId int) (quota int, err error) {
 		return err
 	})
 	if err != nil {
-		return 0, fmt.Errorf("%w, %v", ErrRedemptionFailed, err)
+		return 0, ErrRedemptionFailed
 	}
 	RecordLog(userId, LogTypeTopup, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)))
 	return redemption.Quota, nil

@@ -123,6 +123,8 @@ const EditUser = (props) => {
     setIsModalOpen(true);
   };
 
+  const rwp = renderQuotaWithPrompt(quota);
+
   return (
     <>
       <SideSheet
@@ -214,7 +216,7 @@ const EditUser = (props) => {
                 optionList={groupOptions}
               />
               <div style={{ marginTop: 20 }}>
-                <Typography.Text>{`${t('pages.User.EditUser.remainingQuota')}${renderQuotaWithPrompt(quota)}`}</Typography.Text>
+                <Typography.Text>{`${t('pages.User.EditUser.remainingQuota')}${rwp}`}</Typography.Text>
               </div>
               <Space>
                 <Input
