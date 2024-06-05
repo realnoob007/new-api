@@ -41,30 +41,28 @@ function renderTimestamp(timestamp) {
 
 let type2label = undefined;
 
-function renderType(type) {
-  const { t } = useTranslation();
-
-  if (!type2label) {
-    type2label = new Map();
-    for (let i = 0; i < CHANNEL_OPTIONS.length; i++) {
-      type2label[CHANNEL_OPTIONS[i].value] = CHANNEL_OPTIONS[i];
-    }
-    type2label[0] = {
-      value: 0,
-      text: t('components.ChannelsTable.unknownType'),
-      color: 'grey',
-    };
-  }
-  return (
-    <Tag size='large' color={type2label[type]?.color}>
-      {type2label[type]?.text}
-    </Tag>
-  );
-}
-
 const ChannelsTable = () => {
   const showError = useShowError();
   const { t } = useTranslation();
+
+  function renderType(type) {
+    if (!type2label) {
+      type2label = new Map();
+      for (let i = 0; i < CHANNEL_OPTIONS.length; i++) {
+        type2label[CHANNEL_OPTIONS[i].value] = CHANNEL_OPTIONS[i];
+      }
+      type2label[0] = {
+        value: 0,
+        text: t('components.ChannelsTable.unknownType'),
+        color: 'grey',
+      };
+    }
+    return (
+      <Tag size='large' color={type2label[type]?.color}>
+        {type2label[type]?.text}
+      </Tag>
+    );
+  }
 
   const columns = [
     {

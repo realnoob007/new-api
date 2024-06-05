@@ -226,6 +226,8 @@ const EditToken = (props) => {
     setTokenCount(1); // 重置数量为默认值
   };
 
+  const rwp = renderQuotaWithPrompt(remain_quota);
+
   return (
     <>
       <SideSheet
@@ -325,7 +327,7 @@ const EditToken = (props) => {
             description={t('pages.Token.EditToken.quotaWarning')}
           ></Banner>
           <div style={{ marginTop: 20 }}>
-            <Typography.Text>{`${t('pages.Token.EditToken.quota')}${renderQuotaWithPrompt(remain_quota)}`}</Typography.Text>
+            <Typography.Text>{`${t('pages.Token.EditToken.quota')}${rwp}`}</Typography.Text>
           </div>
           <AutoComplete
             style={{ marginTop: 8 }}

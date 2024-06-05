@@ -122,6 +122,8 @@ const EditRedemption = (props) => {
     setLoading(false);
   };
 
+  const rwp = renderQuotaWithPrompt(quota);
+
   return (
     <>
       <SideSheet
@@ -172,7 +174,7 @@ const EditRedemption = (props) => {
           <div style={{ marginTop: 20 }}>
             <Typography.Text>
               {t('pages.Redemption.EditRedemption.quota', {
-                quota: renderQuotaWithPrompt(quota),
+                quota: rwp,
               })}
             </Typography.Text>
           </div>

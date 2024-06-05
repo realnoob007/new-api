@@ -295,6 +295,8 @@ const PersonalSetting = () => {
       });
     }
   };
+  const rwp1 = renderQuotaWithPrompt(userState?.user?.aff_quota);
+  const rwp2 = renderQuotaWithPrompt(transferAmount);
 
   return (
     <div>
@@ -312,7 +314,7 @@ const PersonalSetting = () => {
             <div style={{ marginTop: 20 }}>
               <Typography.Text>
                 {t('components.PersonalSetting.availableQuota')}
-                {renderQuotaWithPrompt(userState?.user?.aff_quota)}
+                {rwp1}
               </Typography.Text>
               <Input
                 style={{ marginTop: 5 }}
@@ -323,7 +325,7 @@ const PersonalSetting = () => {
             <div style={{ marginTop: 20 }}>
               <Typography.Text>
                 {t('components.PersonalSetting.transferQuota')}
-                {renderQuotaWithPrompt(transferAmount)}{' '}
+                {rwp2}{' '}
                 {t('components.PersonalSetting.transferMinAmount') +
                   renderQuota(getQuotaPerUnit())}
               </Typography.Text>
