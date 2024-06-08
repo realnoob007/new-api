@@ -16,44 +16,6 @@ import { UserContext } from '../context/User/index.js';
 import Text from '@douyinfe/semi-ui/lib/es/typography/text';
 import { useTranslation } from 'react-i18next';
 
-function renderQuotaType(type) {
-  // Ensure all cases are string literals by adding quotes.
-  switch (type) {
-    case 1:
-      return (
-        <Tag color='green' size='large'>
-          {t('components.ModelPricing.quotaType.perUsage')}
-        </Tag>
-      );
-    case 0:
-      return (
-        <Tag color='blue' size='large'>
-          {t('components.ModelPricing.quotaType.perQuantity')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='white' size='large'>
-          {t('components.ModelPricing.quotaType.unknown')}
-        </Tag>
-      );
-  }
-}
-
-function renderAvailable(available) {
-  return available ? (
-    <Tag color='green' size='large'>
-      {t('components.ModelPricing.available')}
-    </Tag>
-  ) : (
-    <Tooltip content={t('components.ModelPricing.unavailableTooltip')}>
-      <Tag color='red' size='large'>
-        {t('components.ModelPricing.unavailable')}
-      </Tag>
-    </Tooltip>
-  );
-}
-
 const ModelPricing = () => {
   const showError = useShowError();
   const { t } = useTranslation();
@@ -77,6 +39,44 @@ const ModelPricing = () => {
     const newFilteredValue = value ? [value] : [];
     setFilteredValue(newFilteredValue);
   };
+
+  function renderQuotaType(type) {
+    // Ensure all cases are string literals by adding quotes.
+    switch (type) {
+      case 1:
+        return (
+          <Tag color='green' size='large'>
+            {t('components.ModelPricing.quotaType.perUsage')}
+          </Tag>
+        );
+      case 0:
+        return (
+          <Tag color='blue' size='large'>
+            {t('components.ModelPricing.quotaType.perQuantity')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='white' size='large'>
+            {t('components.ModelPricing.quotaType.unknown')}
+          </Tag>
+        );
+    }
+  }
+
+  function renderAvailable(available) {
+    return available ? (
+      <Tag color='green' size='large'>
+        {t('components.ModelPricing.available')}
+      </Tag>
+    ) : (
+      <Tooltip content={t('components.ModelPricing.unavailableTooltip')}>
+        <Tag color='red' size='large'>
+          {t('components.ModelPricing.unavailable')}
+        </Tag>
+      </Tooltip>
+    );
+  }
 
   const columns = [
     {
