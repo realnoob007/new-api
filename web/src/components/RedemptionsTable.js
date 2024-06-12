@@ -25,39 +25,39 @@ function renderTimestamp(timestamp) {
   return <>{timestamp2string(timestamp)}</>;
 }
 
-function renderStatus(status) {
-  const { t } = useTranslation();
-  switch (status) {
-    case 1:
-      return (
-        <Tag color='green' size='large'>
-          {t('components.RedemptionsTable.unused')}
-        </Tag>
-      );
-    case 2:
-      return (
-        <Tag color='red' size='large'>
-          {t('components.RedemptionsTable.disabled')}
-        </Tag>
-      );
-    case 3:
-      return (
-        <Tag color='grey' size='large'>
-          {t('components.RedemptionsTable.used')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='black' size='large'>
-          {t('components.RedemptionsTable.unknownStatus')}
-        </Tag>
-      );
-  }
-}
-
 const RedemptionsTable = () => {
   const showError = useShowError();
   const { t } = useTranslation();
+
+  function renderStatus(status) {
+    switch (status) {
+      case 1:
+        return (
+          <Tag color='green' size='large'>
+            {t('components.RedemptionsTable.unused')}
+          </Tag>
+        );
+      case 2:
+        return (
+          <Tag color='red' size='large'>
+            {t('components.RedemptionsTable.disabled')}
+          </Tag>
+        );
+      case 3:
+        return (
+          <Tag color='grey' size='large'>
+            {t('components.RedemptionsTable.used')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='black' size='large'>
+            {t('components.RedemptionsTable.unknownStatus')}
+          </Tag>
+        );
+    }
+  }
+
   const columns = [
     {
       title: 'ID',

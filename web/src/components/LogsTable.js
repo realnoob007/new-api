@@ -60,85 +60,83 @@ const colors = [
   'yellow',
 ];
 
-function renderType(type) {
-  const { t } = useTranslation();
-  switch (type) {
-    case 1:
-      return (
-        <Tag color='cyan' size='large'>
-          {t('components.LogsTable.type.recharge')}
-        </Tag>
-      );
-    case 2:
-      return (
-        <Tag color='lime' size='large'>
-          {t('components.LogsTable.type.consume')}
-        </Tag>
-      );
-    case 3:
-      return (
-        <Tag color='orange' size='large'>
-          {t('components.LogsTable.type.manage')}
-        </Tag>
-      );
-    case 4:
-      return (
-        <Tag color='purple' size='large'>
-          {t('components.LogsTable.type.system')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='black' size='large'>
-          {t('components.LogsTable.type.unknown')}
-        </Tag>
-      );
-  }
-}
-
-function renderIsStream(bool) {
-  const { t } = useTranslation();
-  if (bool) {
-    return (
-      <Tag color='blue' size='large'>
-        {t('components.LogsTable.stream')}
-      </Tag>
-    );
-  } else {
-    return (
-      <Tag color='purple' size='large'>
-        {t('components.LogsTable.nonStream')}
-      </Tag>
-    );
-  }
-}
-
-function renderUseTime(type) {
-  const { t } = useTranslation();
-  const time = parseInt(type);
-  if (time < 101) {
-    return (
-      <Tag color='green' size='large'>
-        {t('components.LogsTable.useTime', { time })}
-      </Tag>
-    );
-  } else if (time < 300) {
-    return (
-      <Tag color='orange' size='large'>
-        {t('components.LogsTable.useTime', { time })}
-      </Tag>
-    );
-  } else {
-    return (
-      <Tag color='red' size='large'>
-        {t('components.LogsTable.useTime', { time })}
-      </Tag>
-    );
-  }
-}
-
 const LogsTable = () => {
   const { t } = useTranslation();
+
+  function renderType(type) {
+    switch (type) {
+      case 1:
+        return (
+          <Tag color='cyan' size='large'>
+            {t('components.LogsTable.type.recharge')}
+          </Tag>
+        );
+      case 2:
+        return (
+          <Tag color='lime' size='large'>
+            {t('components.LogsTable.type.consume')}
+          </Tag>
+        );
+      case 3:
+        return (
+          <Tag color='orange' size='large'>
+            {t('components.LogsTable.type.manage')}
+          </Tag>
+        );
+      case 4:
+        return (
+          <Tag color='purple' size='large'>
+            {t('components.LogsTable.type.system')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='black' size='large'>
+            {t('components.LogsTable.type.unknown')}
+          </Tag>
+        );
+    }
+  }
+
+  function renderIsStream(bool) {
+    if (bool) {
+      return (
+        <Tag color='blue' size='large'>
+          {t('components.LogsTable.stream')}
+        </Tag>
+      );
+    } else {
+      return (
+        <Tag color='purple' size='large'>
+          {t('components.LogsTable.nonStream')}
+        </Tag>
+      );
+    }
+  }
+
+  function renderUseTime(type) {
+    const time = parseInt(type);
+    if (time < 101) {
+      return (
+        <Tag color='green' size='large'>
+          {t('components.LogsTable.useTime', { time })}
+        </Tag>
+      );
+    } else if (time < 300) {
+      return (
+        <Tag color='orange' size='large'>
+          {t('components.LogsTable.useTime', { time })}
+        </Tag>
+      );
+    } else {
+      return (
+        <Tag color='red' size='large'>
+          {t('components.LogsTable.useTime', { time })}
+        </Tag>
+      );
+    }
+  }
+
   const columns = [
     {
       title: t('components.LogsTable.columns.time'),

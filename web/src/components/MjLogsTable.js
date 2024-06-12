@@ -40,177 +40,6 @@ const colors = [
   'yellow',
 ];
 
-function renderType(type) {
-  const { t } = useTranslation();
-  switch (type) {
-    case 'IMAGINE':
-      return (
-        <Tag color='blue' size='large'>
-          {t('components.MjLogsTable.type.imagine')}
-        </Tag>
-      );
-    case 'UPSCALE':
-      return (
-        <Tag color='orange' size='large'>
-          {t('components.MjLogsTable.type.upscale')}
-        </Tag>
-      );
-    case 'VARIATION':
-    case 'HIGH_VARIATION':
-    case 'LOW_VARIATION':
-      return (
-        <Tag color='purple' size='large'>
-          {t('components.MjLogsTable.type.variation')}
-        </Tag>
-      );
-    case 'PAN':
-      return (
-        <Tag color='cyan' size='large'>
-          {t('components.MjLogsTable.type.pan')}
-        </Tag>
-      );
-    case 'DESCRIBE':
-      return (
-        <Tag color='yellow' size='large'>
-          {t('components.MjLogsTable.type.describe')}
-        </Tag>
-      );
-    case 'BLEND':
-      return (
-        <Tag color='lime' size='large'>
-          {t('components.MjLogsTable.type.blend')}
-        </Tag>
-      );
-    case 'SHORTEN':
-      return (
-        <Tag color='pink' size='large'>
-          {t('components.MjLogsTable.type.shorten')}
-        </Tag>
-      );
-    case 'REROLL':
-      return (
-        <Tag color='indigo' size='large'>
-          {t('components.MjLogsTable.type.reroll')}
-        </Tag>
-      );
-    case 'INPAINT':
-      return (
-        <Tag color='violet' size='large'>
-          {t('components.MjLogsTable.type.inpaint')}
-        </Tag>
-      );
-    case 'ZOOM':
-    case 'CUSTOM_ZOOM':
-      return (
-        <Tag color='teal' size='large'>
-          {t('components.MjLogsTable.type.zoom')}
-        </Tag>
-      );
-    case 'MODAL':
-      return (
-        <Tag color='green' size='large'>
-          {t('components.MjLogsTable.type.modal')}
-        </Tag>
-      );
-    case 'SWAP_FACE':
-      return (
-        <Tag color='light-green' size='large'>
-          {t('components.MjLogsTable.type.swapFace')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='white' size='large'>
-          {t('components.MjLogsTable.type.unknown')}
-        </Tag>
-      );
-  }
-}
-
-function renderCode(code) {
-  const { t } = useTranslation();
-  switch (code) {
-    case 1:
-      return (
-        <Tag color='green' size='large'>
-          {t('components.MjLogsTable.code.submitted')}
-        </Tag>
-      );
-    case 21:
-      return (
-        <Tag color='lime' size='large'>
-          {t('components.MjLogsTable.code.waiting')}
-        </Tag>
-      );
-    case 22:
-      return (
-        <Tag color='orange' size='large'>
-          {t('components.MjLogsTable.code.duplicateSubmission')}
-        </Tag>
-      );
-    case 0:
-      return (
-        <Tag color='yellow' size='large'>
-          {t('components.MjLogsTable.code.notSubmitted')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='white' size='large'>
-          {t('components.MjLogsTable.code.unknown')}
-        </Tag>
-      );
-  }
-}
-
-function renderStatus(type) {
-  const { t } = useTranslation();
-  switch (type) {
-    case 'SUCCESS':
-      return (
-        <Tag color='green' size='large'>
-          {t('components.MjLogsTable.status.success')}
-        </Tag>
-      );
-    case 'NOT_START':
-      return (
-        <Tag color='grey' size='large'>
-          {t('components.MjLogsTable.status.notStarted')}
-        </Tag>
-      );
-    case 'SUBMITTED':
-      return (
-        <Tag color='yellow' size='large'>
-          {t('components.MjLogsTable.status.queued')}
-        </Tag>
-      );
-    case 'IN_PROGRESS':
-      return (
-        <Tag color='blue' size='large'>
-          {t('components.MjLogsTable.status.inProgress')}
-        </Tag>
-      );
-    case 'FAILURE':
-      return (
-        <Tag color='red' size='large'>
-          {t('components.MjLogsTable.status.failure')}
-        </Tag>
-      );
-    case 'MODAL':
-      return (
-        <Tag color='yellow' size='large'>
-          {t('components.MjLogsTable.status.modalWait')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='white' size='large'>
-          {t('components.MjLogsTable.status.unknown')}
-        </Tag>
-      );
-  }
-}
-
 const renderTimestamp = (timestampInSeconds) => {
   const date = new Date(timestampInSeconds * 1000); // 从秒转换为毫秒
 
@@ -254,6 +83,175 @@ const LogsTable = () => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
+
+  function renderType(type) {
+    switch (type) {
+      case 'IMAGINE':
+        return (
+          <Tag color='blue' size='large'>
+            {t('components.MjLogsTable.type.imagine')}
+          </Tag>
+        );
+      case 'UPSCALE':
+        return (
+          <Tag color='orange' size='large'>
+            {t('components.MjLogsTable.type.upscale')}
+          </Tag>
+        );
+      case 'VARIATION':
+      case 'HIGH_VARIATION':
+      case 'LOW_VARIATION':
+        return (
+          <Tag color='purple' size='large'>
+            {t('components.MjLogsTable.type.variation')}
+          </Tag>
+        );
+      case 'PAN':
+        return (
+          <Tag color='cyan' size='large'>
+            {t('components.MjLogsTable.type.pan')}
+          </Tag>
+        );
+      case 'DESCRIBE':
+        return (
+          <Tag color='yellow' size='large'>
+            {t('components.MjLogsTable.type.describe')}
+          </Tag>
+        );
+      case 'BLEND':
+        return (
+          <Tag color='lime' size='large'>
+            {t('components.MjLogsTable.type.blend')}
+          </Tag>
+        );
+      case 'SHORTEN':
+        return (
+          <Tag color='pink' size='large'>
+            {t('components.MjLogsTable.type.shorten')}
+          </Tag>
+        );
+      case 'REROLL':
+        return (
+          <Tag color='indigo' size='large'>
+            {t('components.MjLogsTable.type.reroll')}
+          </Tag>
+        );
+      case 'INPAINT':
+        return (
+          <Tag color='violet' size='large'>
+            {t('components.MjLogsTable.type.inpaint')}
+          </Tag>
+        );
+      case 'ZOOM':
+      case 'CUSTOM_ZOOM':
+        return (
+          <Tag color='teal' size='large'>
+            {t('components.MjLogsTable.type.zoom')}
+          </Tag>
+        );
+      case 'MODAL':
+        return (
+          <Tag color='green' size='large'>
+            {t('components.MjLogsTable.type.modal')}
+          </Tag>
+        );
+      case 'SWAP_FACE':
+        return (
+          <Tag color='light-green' size='large'>
+            {t('components.MjLogsTable.type.swapFace')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='white' size='large'>
+            {t('components.MjLogsTable.type.unknown')}
+          </Tag>
+        );
+    }
+  }
+
+  function renderStatus(type) {
+    switch (type) {
+      case 'SUCCESS':
+        return (
+          <Tag color='green' size='large'>
+            {t('components.MjLogsTable.status.success')}
+          </Tag>
+        );
+      case 'NOT_START':
+        return (
+          <Tag color='grey' size='large'>
+            {t('components.MjLogsTable.status.notStarted')}
+          </Tag>
+        );
+      case 'SUBMITTED':
+        return (
+          <Tag color='yellow' size='large'>
+            {t('components.MjLogsTable.status.queued')}
+          </Tag>
+        );
+      case 'IN_PROGRESS':
+        return (
+          <Tag color='blue' size='large'>
+            {t('components.MjLogsTable.status.inProgress')}
+          </Tag>
+        );
+      case 'FAILURE':
+        return (
+          <Tag color='red' size='large'>
+            {t('components.MjLogsTable.status.failure')}
+          </Tag>
+        );
+      case 'MODAL':
+        return (
+          <Tag color='yellow' size='large'>
+            {t('components.MjLogsTable.status.modalWait')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='white' size='large'>
+            {t('components.MjLogsTable.status.unknown')}
+          </Tag>
+        );
+    }
+  }
+
+  function renderCode(code) {
+    switch (code) {
+      case 1:
+        return (
+          <Tag color='green' size='large'>
+            {t('components.MjLogsTable.code.submitted')}
+          </Tag>
+        );
+      case 21:
+        return (
+          <Tag color='lime' size='large'>
+            {t('components.MjLogsTable.code.waiting')}
+          </Tag>
+        );
+      case 22:
+        return (
+          <Tag color='orange' size='large'>
+            {t('components.MjLogsTable.code.duplicateSubmission')}
+          </Tag>
+        );
+      case 0:
+        return (
+          <Tag color='yellow' size='large'>
+            {t('components.MjLogsTable.code.notSubmitted')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='white' size='large'>
+            {t('components.MjLogsTable.code.unknown')}
+          </Tag>
+        );
+    }
+  }
+
   const columns = [
     {
       title: t('components.MjLogsTable.columns.submitTime'),

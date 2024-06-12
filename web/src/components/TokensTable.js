@@ -40,52 +40,52 @@ function renderTimestamp(timestamp) {
   return <>{timestamp2string(timestamp)}</>;
 }
 
-function renderStatus(status, model_limits_enabled = false) {
-  const { t } = useTranslation();
-  switch (status) {
-    case 1:
-      if (model_limits_enabled) {
-        return (
-          <Tag color='green' size='large'>
-            {t('components.TokensTable.enabledWithLimit')}
-          </Tag>
-        );
-      } else {
-        return (
-          <Tag color='green' size='large'>
-            {t('components.TokensTable.enabled')}
-          </Tag>
-        );
-      }
-    case 2:
-      return (
-        <Tag color='red' size='large'>
-          {t('components.TokensTable.disabled')}
-        </Tag>
-      );
-    case 3:
-      return (
-        <Tag color='yellow' size='large'>
-          {t('components.TokensTable.expired')}
-        </Tag>
-      );
-    case 4:
-      return (
-        <Tag color='grey' size='large'>
-          {t('components.TokensTable.exhausted')}
-        </Tag>
-      );
-    default:
-      return (
-        <Tag color='black' size='large'>
-          {t('components.TokensTable.unknownStatus')}
-        </Tag>
-      );
-  }
-}
-
 const TokensTable = () => {
   const { t } = useTranslation();
+
+  function renderStatus(status, model_limits_enabled = false) {
+    switch (status) {
+      case 1:
+        if (model_limits_enabled) {
+          return (
+            <Tag color='green' size='large'>
+              {t('components.TokensTable.enabledWithLimit')}
+            </Tag>
+          );
+        } else {
+          return (
+            <Tag color='green' size='large'>
+              {t('components.TokensTable.enabled')}
+            </Tag>
+          );
+        }
+      case 2:
+        return (
+          <Tag color='red' size='large'>
+            {t('components.TokensTable.disabled')}
+          </Tag>
+        );
+      case 3:
+        return (
+          <Tag color='yellow' size='large'>
+            {t('components.TokensTable.expired')}
+          </Tag>
+        );
+      case 4:
+        return (
+          <Tag color='grey' size='large'>
+            {t('components.TokensTable.exhausted')}
+          </Tag>
+        );
+      default:
+        return (
+          <Tag color='black' size='large'>
+            {t('components.TokensTable.unknownStatus')}
+          </Tag>
+        );
+    }
+  }
+
   const link_menu = [
     {
       node: 'item',
