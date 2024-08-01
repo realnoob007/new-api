@@ -180,7 +180,7 @@ const TopUp = () => {
   }, []);
 
   const renderAmount = () => {
-    return amount + t('pages.TopUp.index.currency');
+    return amount + t(' dollars');
   };
 
   const getAmount = async (value) => {
@@ -307,6 +307,30 @@ const TopUp = () => {
                     }}
                   />
                   <Space>
+                    <Button
+                      style={{
+                        backgroundColor: 'rgba(var(--semi-purple-5), 1)',
+                      }}
+                      type={'primary'}
+                      theme={'solid'}
+                      onClick={async () => {
+                        preTopUp('stripe');
+                      }}
+                    >
+                      {t('pages.TopUp.index.alipay')}
+                    </Button>
+                    <Button
+                      style={{
+                        backgroundColor: 'rgba(var(--semi-yellow-5), 1)',
+                      }}
+                      type={'primary'}
+                      theme={'solid'}
+                      onClick={async () => {
+                        preTopUp('paypal');
+                      }}
+                    >
+                      {t('pages.TopUp.index.alipay')}
+                    </Button>
                     <Button
                       type={'primary'}
                       theme={'solid'}

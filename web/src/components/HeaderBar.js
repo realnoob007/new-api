@@ -133,8 +133,8 @@ const HeaderBar = () => {
                   style={{ width: 120 }}
                   onChange={i18n.changeLanguage}
                 >
-                  <Select.Option value='zh'>中文</Select.Option>
                   <Select.Option value='en'>English</Select.Option>
+                  <Select.Option value='zh'>中文</Select.Option>
                 </Select>
                 <Nav.Item itemKey={'about'} icon={<IconHelpCircle />} />
                 <Switch
