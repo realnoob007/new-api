@@ -314,10 +314,10 @@ const TopUp = () => {
                       type={'primary'}
                       theme={'solid'}
                       onClick={async () => {
-                        preTopUp('stripe');
+                        preTopUp('bank');
                       }}
                     >
-                      {t('pages.TopUp.index.alipay')}
+                      Stripe
                     </Button>
                     <Button
                       style={{
@@ -329,7 +329,7 @@ const TopUp = () => {
                         preTopUp('paypal');
                       }}
                     >
-                      {t('pages.TopUp.index.alipay')}
+                      Paypal
                     </Button>
                     <Button
                       type={'primary'}
