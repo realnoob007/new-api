@@ -103,6 +103,14 @@ func RequestEpay(c *gin.Context) {
 		req.PaymentMethod = "wxpay"
 		payType = epay.WechatPay
 	}
+	if req.PaymentMethod == "stripe" {
+		req.PaymentMethod = "stripe"
+		payType = "stripe"
+	}
+	if req.PaymentMethod == "paypal" {
+		req.PaymentMethod = "paypal"
+		payType = "paypal"
+	}
 	callBackAddress := service.GetCallbackAddress()
 	returnUrl, _ := url.Parse(common.ServerAddress + "/log")
 	notifyUrl, _ := url.Parse(callBackAddress + "/api/user/epay/notify")
