@@ -46,7 +46,7 @@ const SiderBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(defaultIsCollapsed);
 
   const routerMap = {
-    home: '/',
+    home: '/home',
     channel: '/channel',
     token: '/token',
     redemption: '/redemption',
