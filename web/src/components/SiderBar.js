@@ -66,7 +66,7 @@ const SiderBar = () => {
       {
         text: t('components.SiderBar.home'),
         itemKey: 'home',
-        to: '/',
+        to: '/home',
         icon: <IconHome />,
       },
       {
