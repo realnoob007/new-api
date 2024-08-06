@@ -72,7 +72,7 @@ function App() {
         <Layout.Content>
           <Routes>
             <Route
-              path='/'
+              path='/home'
               element={
                 <Suspense fallback={<Loading></Loading>}>
                   <Home />
