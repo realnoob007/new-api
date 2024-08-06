@@ -216,6 +216,13 @@ const SiderBar = () => {
             onSelect={(key) => {
               setSelectedKeys([key.itemKey]);
             }}
+            onClick={({itemKey, event, isOpen}) => {
+              if ('home' == itemKey) {
+                console.log('click home');
+                window.location = '/';
+                window.location.reload();
+              }
+            }}
             header={{
               logo: (
                 <img src={logo} alt='logo' style={{ marginRight: '0.75em' }} />
