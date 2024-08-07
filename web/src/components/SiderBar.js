@@ -214,13 +214,15 @@ const SiderBar = () => {
             }}
             items={headerButtons}
             onSelect={(key) => {
-              setSelectedKeys([key.itemKey]);
+              if ('home' != key.itemKey) {
+                  setSelectedKeys([key.itemKey]);
+              }
             }}
             onClick={({itemKey, event, isOpen}) => {
               if ('home' == itemKey) {
-                console.log('click home');
-                window.location = '/';
-                window.location.reload();
+                console.log('click home 11111');
+                setSelectedKeys(['/']);
+                window.location.replace('/');
               }
             }}
             header={{
